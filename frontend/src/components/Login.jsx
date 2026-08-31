@@ -46,10 +46,6 @@ export default function Login({ onLogin }) {
           </div>
         </div>
 
-        <div className="subtitle-container">
-          <p className="subtitle">Smart Bus Seat Availability and Allocation</p>
-        </div>
-
         <form className="login-form">
           <div className="form-group">
             <label htmlFor="username">User ID / Student ID / Username</label>
