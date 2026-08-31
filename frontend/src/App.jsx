@@ -4,6 +4,8 @@ import Login from './components/Login';
 import StudentDashboard from './components/StudentDashboard';
 import DriverDashboard from './components/DriverDashboard';
 
+import Footer from './components/Footer';
+
 // Mock Campus Buses Data
 const INITIAL_BUSES = [
   {
@@ -73,24 +75,27 @@ function App() {
   };
 
   return (
-    <>
-      {!user ? (
-        <Login onLogin={handleLogin} />
-      ) : user.role === 'driver' ? (
-        <DriverDashboard
-          user={user}
-          buses={buses}
-          onUpdateBus={handleUpdateBus}
-          onLogout={handleLogout}
-        />
-      ) : (
-        <StudentDashboard
-          user={user}
-          buses={buses}
-          onLogout={handleLogout}
-        />
-      )}
-    </>
+    <div className="app-container">
+      <main className="app-main-content">
+        {!user ? (
+          <Login onLogin={handleLogin} />
+        ) : user.role === 'driver' ? (
+          <DriverDashboard
+            user={user}
+            buses={buses}
+            onUpdateBus={handleUpdateBus}
+            onLogout={handleLogout}
+          />
+        ) : (
+          <StudentDashboard
+            user={user}
+            buses={buses}
+            onLogout={handleLogout}
+          />
+        )}
+      </main>
+      <Footer />
+    </div>
   );
 }
 

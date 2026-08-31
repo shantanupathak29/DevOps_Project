@@ -52,14 +52,32 @@ body {
   background: transparent;
 }
 
+/* App Container Layout */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+}
+
+.app-main-content {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  position: relative;
+}
+
 /* Login Page Styling */
 .login-page {
   position: relative;
-  min-height: 100vh;
+  flex: 1;
+  min-height: calc(100vh - 65px);
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px;
+  padding: 40px 20px;
   background: transparent;
   overflow: hidden;
 }
@@ -226,7 +244,8 @@ body {
 
 /* Dashboard Layout */
 .dashboard-container {
-  min-height: 100vh;
+  flex: 1;
+  min-height: calc(100vh - 65px);
   background: var(--bg-dark);
   padding: 24px 40px;
   box-sizing: border-box;
@@ -891,4 +910,199 @@ body {
   padding: 24px;
   text-align: left;
   box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+/* =========================================================
+   CampusRide Footer Component Styles
+   ========================================================= */
+.app-footer {
+  position: relative;
+  z-index: 50;
+  background: rgba(8, 14, 26, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.45);
+  margin-top: auto;
+  width: 100%;
+}
+
+.footer-glow-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(33, 133, 213, 0.8) 50%, transparent 100%);
+}
+
+.footer-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 14px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.footer-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.footer-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer-logo-icon {
+  color: var(--primary);
+  filter: drop-shadow(0 0 8px rgba(33, 133, 213, 0.6));
+  flex-shrink: 0;
+}
+
+.footer-brand-title {
+  font-weight: 700;
+  font-size: 14px;
+  color: #ffffff;
+  letter-spacing: -0.3px;
+}
+
+.footer-divider-dot {
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 10px;
+  user-select: none;
+}
+
+.footer-copy {
+  margin: 0;
+  font-size: 13px;
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.highlight-text {
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.footer-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.developed-by-label {
+  font-size: 13px;
+  color: #94a3b8;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.heart-icon {
+  display: inline-block;
+  font-size: 12px;
+  animation: pulse-heart 2s infinite ease-in-out;
+}
+
+@keyframes pulse-heart {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.25); }
+}
+
+.dev-chips-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dev-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 6px;
+  border-radius: 9999px;
+  background: rgba(30, 41, 59, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  text-decoration: none;
+  color: #cbd5e1;
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.dev-chip:hover {
+  background: rgba(33, 133, 213, 0.18);
+  border-color: rgba(33, 133, 213, 0.45);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(33, 133, 213, 0.3);
+}
+
+.dev-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+  border: 1px solid;
+  transition: transform 0.2s ease;
+}
+
+.dev-chip:hover .dev-avatar {
+  transform: scale(1.1);
+}
+
+.dev-name {
+  letter-spacing: 0.2px;
+}
+
+.linkedin-icon {
+  color: #0a66c2;
+  transition: transform 0.2s ease, filter 0.2s ease;
+  filter: drop-shadow(0 0 2px rgba(10, 102, 194, 0.4));
+  flex-shrink: 0;
+}
+
+.dev-chip:hover .linkedin-icon {
+  transform: scale(1.2) rotate(-5deg);
+  filter: drop-shadow(0 0 6px rgba(10, 102, 194, 0.8));
+}
+
+@media (max-width: 860px) {
+  .footer-container {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 12px;
+    padding: 18px 20px;
+  }
+
+  .footer-left {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .footer-divider-dot {
+    display: none;
+  }
+
+  .footer-right {
+    flex-direction: column;
+    gap: 10px;
+  }
 }
