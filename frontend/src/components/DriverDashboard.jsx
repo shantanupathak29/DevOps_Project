@@ -1,0 +1,207 @@
+import React, { useState } from 'react';
+
+export default function DriverDashboard({ user, buses, onUpdateBus, onLogout }) {
+  // Find which bus belongs to this driver, or fall back to first bus
+  const driverBus = buses.find(b => b.driver.toLowerCase() === user.username.toLowerCase()) || buses[0];
+
+  const [seats, setSeats] = useState(driverBus.seatsAvailable);
+  const [status, setStatus] = useState(driverBus.status);
+  const [nextStop, setNextStop] = useState(driverBus.nextStop);
+  const [eta, setEta] = useState(driverBus.eta);
+
+  const handleIncrement = () => {
+    if (seats < driverBus.totalCapacity) {
+      const newSeats = seats + 1;
+      setSeats(newSeats);
+      onUpdateBus(driverBus.id, { seatsAvailable: newSeats });
+    }
+  };
+
+  const handleDecrement = () => {
+    if (seats > 0) {
+      const newSeats = seats - 1;
+      setSeats(newSeats);
+      onUpdateBus(driverBus.id, { seatsAvailable: newSeats });
+    }
+  };
+
+  const handleStatusChange = (e) => {
+    const newStatus = e.target.value;
+    setStatus(newStatus);
+    onUpdateBus(driverBus.id, { status: newStatus });
+  };
+
+  const handleStopChange = (e) => {
+    const newStop = e.target.value;
+    setNextStop(newStop);
+    
+    // Simulate updating ETA automatically based on stop for realistic feedback
+    let autoEta = '3 mins';
+    if (newStop.includes('Hostel')) autoEta = '8 mins';
+    else if (newStop.includes('Library')) autoEta = '12 mins';
+    else if (newStop.includes('Admin')) autoEta = '15 mins';
+    else if (newStop.includes('Gate')) autoEta = '5 mins';
+    
+    setEta(autoEta);
+    onUpdateBus(driverBus.id, { nextStop: newStop, eta: autoEta });
+  };
+
+  const handleEtaChange = (e) => {
+    const newEta = e.target.value;
+    setEta(newEta);
+    onUpdateBus(driverBus.id, { eta: newEta });
+  };
+
+  return (
+    <div className="dashboard-container">
+      {/* Header */}
+      <header className="dashboard-header">
+        <div className="header-brand">
+          <span className="logo-icon-sm">🚌</span>
+          <h1>CampusRide</h1>
+          <span className="badge badge-driver">Driver Portal</span>
+        </div>
+        <div className="user-profile">
+          <span className="username">👮 Driver Panel ({user.username})</span>
+          <button className="btn-logout" onClick={onLogout}>Logout</button>
+        </div>
+      </header>
+
+      <div className="driver-dashboard-grid">
+        {/* Control Card */}
+        <div className="card control-card">
+          <h2>Update Bus Status</h2>
+          <p className="card-subtitle">Manage details for assigned bus: <strong>{driverBus.busNo}</strong></p>
+          <p className="route-detail">Route: {driverBus.route}</p>
+
+          <div className="driver-form">
+            {/* Seat Control */}
+            <div className="form-group seats-counter-group">
+              <label>Empty Seats Available</label>
+              <div className="counter-controls">
+                <button 
+                  type="button" 
+                  className="counter-btn" 
+                  onClick={handleDecrement}
+                  disabled={seats <= 0 || status === 'Out of Service'}
+                >
+                  −
+                </button>
+                <span className="counter-display">{seats}</span>
+                <button 
+                  type="button" 
+                  className="counter-btn" 
+                  onClick={handleIncrement}
+                  disabled={seats >= driverBus.totalCapacity || status === 'Out of Service'}
+                >
+                  +
+                </button>
+              </div>
+              <div className="progress-bar-container driver-progress">
+                <div 
+                  className="progress-bar-fill" 
+                  style={{
+                    width: `${((driverBus.totalCapacity - seats) / driverBus.totalCapacity) * 100}%`,
+                    backgroundColor: seats <= 5 ? '#ef4444' : seats <= 12 ? '#f59e0b' : '#10b981'
+                  }}
+                ></div>
+              </div>
+              <p className="input-hint">Capacity: {driverBus.totalCapacity} total seats</p>
+            </div>
+
+            {/* Status Dropdown */}
+            <div className="form-group">
+              <label htmlFor="bus-status">Bus Trip Status</label>
+              <select id="bus-status" value={status} onChange={handleStatusChange}>
+                <option value="Active">Active</option>
+                <option value="In-Transit">In-Transit</option>
+                <option value="Delayed">Delayed</option>
+                <option value="Out of Service">Out of Service</option>
+              </select>
+            </div>
+
+            {/* Next Stop Selector */}
+            <div className="form-group">
+              <label htmlFor="next-stop">Next Campus Stop</label>
+              <select id="next-stop" value={nextStop} onChange={handleStopChange} disabled={status === 'Out of Service'}>
+                <option value="Main Gate">Main Gate</option>
+                <option value="Hostel Block C">Hostel Block C</option>
+                <option value="Science Block">Science Block</option>
+                <option value="Central Library">Central Library</option>
+                <option value="Admin Building">Admin Building</option>
+              </select>
+            </div>
+
+            {/* ETA Input */}
+            <div className="form-group">
+              <label htmlFor="eta">ETA to Next Stop</label>
+              <input 
+                type="text" 
+                id="eta" 
+                value={eta} 
+                onChange={handleEtaChange}
+                placeholder="e.g. 5 mins"
+                disabled={status === 'Out of Service'}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Preview Card */}
+        <div className="card preview-card">
+          <h2>Live Student Preview</h2>
+          <p className="card-subtitle">This is how students see your bus in real-time:</p>
+          
+          <div className="preview-bus-card-wrapper">
+            <div className="bus-card selected">
+              <div className="bus-card-header">
+                <div className="bus-identity">
+                  <span className="bus-avatar">🚍</span>
+                  <div>
+                    <h4>{driverBus.busNo}</h4>
+                    <p className="bus-route-text">{driverBus.route}</p>
+                  </div>
+                </div>
+                <span className={`status-badge status-${status.toLowerCase().replace(' ', '-')}`}>
+                  {status}
+                </span>
+              </div>
+
+              <div className="bus-card-details">
+                <div className="detail-item">
+                  <span className="label">Next Stop:</span>
+                  <span className="value">{status === 'Out of Service' ? 'N/A' : nextStop}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="label">ETA:</span>
+                  <span className="value highlighted">{status === 'Out of Service' ? 'N/A' : eta}</span>
+                </div>
+              </div>
+
+              <div className="capacity-section">
+                <div className="capacity-labels">
+                  <span>Free Seats: <strong>{status === 'Out of Service' ? 0 : seats}</strong></span>
+                  <span>Capacity: {driverBus.totalCapacity}</span>
+                </div>
+                <div className="progress-bar-container">
+                  <div 
+                    className="progress-bar-fill" 
+                    style={{
+                      width: `${status === 'Out of Service' ? 100 : ((driverBus.totalCapacity - seats) / driverBus.totalCapacity) * 100}%`,
+                      backgroundColor: status === 'Out of Service' ? '#64748b' : seats <= 5 ? '#ef4444' : seats <= 12 ? '#f59e0b' : '#10b981'
+                    }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="info-alert">
+            <span className="info-icon">ℹ️</span>
+            <p>Updates are synchronized instantly to the Student Portal without reloading.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
