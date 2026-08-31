@@ -182,17 +182,13 @@ export default function StudentDashboard({ user, buses, onLogout }) {
                 {/* Defs for gradients */}
                 <defs>
                   <linearGradient id="route-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.2" />
-                    <stop offset="100%" stopColor="#2563eb" stopOpacity="0.8" />
+                    <stop offset="0%" stopColor="#2185d5" stopOpacity="0.2" />
+                    <stop offset="100%" stopColor="#2185d5" stopOpacity="0.8" />
                   </linearGradient>
-                  <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="4" result="blur" />
-                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                  </filter>
                 </defs>
 
                 {/* Grid Overlay for high-tech look */}
-                <g stroke="#334155" strokeWidth="0.5" opacity="0.3">
+                <g stroke="#3a4750" strokeWidth="0.5" opacity="0.3">
                   <line x1="50" y1="0" x2="50" y2="400" />
                   <line x1="100" y1="0" x2="100" y2="400" />
                   <line x1="150" y1="0" x2="150" y2="400" />
@@ -216,7 +212,7 @@ export default function StudentDashboard({ user, buses, onLogout }) {
                 <path
                   d="M 50,200 Q 150,50 300,100 T 450,200 T 250,350 Z"
                   fill="none"
-                  stroke="#475569"
+                  stroke="#3a4750"
                   strokeWidth="6"
                   strokeLinecap="round"
                   opacity="0.5"
@@ -227,10 +223,9 @@ export default function StudentDashboard({ user, buses, onLogout }) {
                   <path
                     d="M 50,200 Q 150,50 300,100 T 450,200 T 250,350 Z"
                     fill="none"
-                    stroke="#3b82f6"
+                    stroke="#2185d5"
                     strokeWidth="4"
                     strokeLinecap="round"
-                    filter="url(#glow)"
                     className="animated-route-line"
                   />
                 )}
@@ -238,37 +233,37 @@ export default function StudentDashboard({ user, buses, onLogout }) {
                 {/* Stops / Nodes */}
                 {/* Main Campus Gate */}
                 <g transform="translate(50, 200)" className="map-node">
-                  <circle r="12" fill="#1e293b" stroke="#64748b" strokeWidth="2" />
+                  <circle r="12" fill="#303841" stroke="#3a4750" strokeWidth="2" />
                   <circle r="6" fill="#10b981" />
-                  <text y="-18" textAnchor="middle" fill="#f8fafc" fontSize="10" fontWeight="bold">Main Gate</text>
+                  <text y="-18" textAnchor="middle" fill="#f3f3f3" fontSize="10" fontWeight="bold">Main Gate</text>
                 </g>
 
                 {/* Hostel Block C */}
                 <g transform="translate(200, 95)" className="map-node">
-                  <circle r="12" fill="#1e293b" stroke="#64748b" strokeWidth="2" />
-                  <circle r="6" fill={selectedBus && selectedBus.nextStop.includes('Hostel') ? '#3b82f6' : '#94a3b8'} />
-                  <text y="-18" textAnchor="middle" fill="#f8fafc" fontSize="10">Hostels</text>
+                  <circle r="12" fill="#303841" stroke="#3a4750" strokeWidth="2" />
+                  <circle r="6" fill={selectedBus && selectedBus.nextStop.includes('Hostel') ? '#2185d5' : '#94a3b8'} />
+                  <text y="-18" textAnchor="middle" fill="#f3f3f3" fontSize="10">Hostels</text>
                 </g>
 
                 {/* Science Block */}
                 <g transform="translate(340, 115)" className="map-node">
-                  <circle r="12" fill="#1e293b" stroke="#64748b" strokeWidth="2" />
-                  <circle r="6" fill={selectedBus && selectedBus.nextStop.includes('Science') ? '#3b82f6' : '#94a3b8'} />
-                  <text y="-18" textAnchor="middle" fill="#f8fafc" fontSize="10">Science Block</text>
+                  <circle r="12" fill="#303841" stroke="#3a4750" strokeWidth="2" />
+                  <circle r="6" fill={selectedBus && selectedBus.nextStop.includes('Science') ? '#2185d5' : '#94a3b8'} />
+                  <text y="-18" textAnchor="middle" fill="#f3f3f3" fontSize="10">Science Block</text>
                 </g>
 
                 {/* Central Library */}
                 <g transform="translate(450, 200)" className="map-node">
-                  <circle r="12" fill="#1e293b" stroke="#64748b" strokeWidth="2" />
-                  <circle r="6" fill={selectedBus && selectedBus.nextStop.includes('Library') ? '#3b82f6' : '#94a3b8'} />
-                  <text x="18" y="4" fill="#f8fafc" fontSize="10">Library</text>
+                  <circle r="12" fill="#303841" stroke="#3a4750" strokeWidth="2" />
+                  <circle r="6" fill={selectedBus && selectedBus.nextStop.includes('Library') ? '#2185d5' : '#94a3b8'} />
+                  <text x="18" y="4" fill="#f3f3f3" fontSize="10">Library</text>
                 </g>
 
                 {/* Admin Building */}
                 <g transform="translate(250, 350)" className="map-node">
-                  <circle r="12" fill="#1e293b" stroke="#64748b" strokeWidth="2" />
-                  <circle r="6" fill={selectedBus && selectedBus.nextStop.includes('Admin') ? '#3b82f6' : '#94a3b8'} />
-                  <text y="22" textAnchor="middle" fill="#f8fafc" fontSize="10">Admin Bldg</text>
+                  <circle r="12" fill="#303841" stroke="#3a4750" strokeWidth="2" />
+                  <circle r="6" fill={selectedBus && selectedBus.nextStop.includes('Admin') ? '#2185d5' : '#94a3b8'} />
+                  <text y="22" textAnchor="middle" fill="#f3f3f3" fontSize="10">Admin Bldg</text>
                 </g>
 
                 {/* Bus Indicators */}
@@ -291,7 +286,7 @@ export default function StudentDashboard({ user, buses, onLogout }) {
                       transform={`translate(${x + (idx * 15)}, ${y})`}
                       className={`map-bus-indicator ${isBusSelected ? 'active-bus' : ''}`}
                     >
-                      <rect x="-16" y="-10" width="32" height="20" rx="4" fill={isBusSelected ? '#2563eb' : '#334155'} stroke="#f8fafc" strokeWidth="1.5" />
+                      <rect x="-16" y="-10" width="32" height="20" rx="4" fill={isBusSelected ? '#2185d5' : '#475569'} stroke="#f3f3f3" strokeWidth="1.5" />
                       <text textAnchor="middle" y="4" fill="#ffffff" fontSize="8" fontWeight="bold">
                         {bus.busNo.replace('BUS-', '')}
                       </text>
