@@ -13,15 +13,15 @@ export default function Login({ onLogin }) {
 
   return (
     <div className="login-page">
-      {/* Full-screen interactive ColorBends background */}
+      {/* Full-screen ColorBends WebGL background */}
       <div style={{
         position: 'fixed',
-        top: 0, left: 0,
-        width: '100%', height: '100%',
-        zIndex: 0
+        inset: 0,
+        zIndex: 0,
+        background: '#303841'   /* fallback while WebGL initialises */
       }}>
         <ColorBends
-          colors={["#2185D5", "#3A4750", "#303841", "#F3F3F3"]}
+          colors={["#2185D5", "#000000"]}
           rotation={90}
           speed={0.2}
           scale={1}
@@ -38,7 +38,7 @@ export default function Login({ onLogin }) {
         />
       </div>
 
-      {/* Login Card */}
+      {/* Login card sits above the canvas */}
       <div className="login-card" style={{ position: 'relative', zIndex: 2 }}>
         <div className="logo-container">
           <div className="logo-icon-text">CR</div>
