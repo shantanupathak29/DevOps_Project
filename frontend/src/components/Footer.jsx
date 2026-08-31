@@ -63,7 +63,7 @@ export default function Footer() {
         {/* Right: Developers & LinkedIn Links */}
         <div className="footer-right">
           <span className="developed-by-label">
-            Developed with <span className="heart-icon" aria-label="love">❤️</span> by
+            Developed by
           </span>
 
           <div className="dev-chips-container">
