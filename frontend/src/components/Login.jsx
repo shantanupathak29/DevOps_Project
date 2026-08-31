@@ -8,16 +8,20 @@ export default function Login({ onLogin }) {
   const handleSubmit = (e, role) => {
     e.preventDefault();
     if (!username || !password) return;
-    
-    // Simple mock auth matching rules
     onLogin({ username, role });
   };
 
   return (
     <div className="login-page">
-      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0 }}>
+      {/* Full-screen interactive ColorBends background */}
+      <div style={{
+        position: 'fixed',
+        top: 0, left: 0,
+        width: '100%', height: '100%',
+        zIndex: 0
+      }}>
         <ColorBends
-          colors={["#2185D5"]}
+          colors={["#2185D5", "#3A4750", "#303841", "#F3F3F3"]}
           rotation={90}
           speed={0.2}
           scale={1}
@@ -29,21 +33,22 @@ export default function Login({ onLogin }) {
           iterations={1}
           intensity={1.5}
           bandWidth={6}
-          transparent
+          transparent={false}
           autoRotate={0}
         />
       </div>
 
-      <div className="card login-card">
+      {/* Login Card */}
+      <div className="login-card" style={{ position: 'relative', zIndex: 2 }}>
         <div className="logo-container">
-          <span className="logo-icon">🚌</span>
+          <div className="logo-icon-text">CR</div>
           <div className="title">
             <h2>CampusRide</h2>
           </div>
         </div>
-        
+
         <div className="subtitle-container">
-          <p className="subtitle">Smart Bus Seat Availability & Allocation</p>
+          <p className="subtitle">Smart Bus Seat Availability and Allocation</p>
         </div>
 
         <form className="login-form">
@@ -66,7 +71,7 @@ export default function Login({ onLogin }) {
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder="Enter your password"
               required
             />
           </div>
