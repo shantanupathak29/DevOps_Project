@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ColorBends from './ColorBends';
 
 export default function Login({ onLogin }) {
   const [username, setUsername] = useState('');
@@ -14,11 +15,23 @@ export default function Login({ onLogin }) {
 
   return (
     <div className="login-page">
-      <div className="video-overlay"></div>
-      
-      {/* Dynamic Animated background nodes for futuristic feel */}
-      <div className="bg-bubbles">
-        <div></div><div></div><div></div><div></div><div></div>
+      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0 }}>
+        <ColorBends
+          colors={["#2185D5"]}
+          rotation={90}
+          speed={0.2}
+          scale={1}
+          frequency={1}
+          warpStrength={1}
+          mouseInfluence={1}
+          noise={0.15}
+          parallax={0.5}
+          iterations={1}
+          intensity={1.5}
+          bandWidth={6}
+          transparent
+          autoRotate={0}
+        />
       </div>
 
       <div className="card login-card">

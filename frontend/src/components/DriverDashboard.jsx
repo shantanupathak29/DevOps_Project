@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Silk from './Silk';
 
 export default function DriverDashboard({ user, buses, onUpdateBus, onLogout }) {
   // Find which bus belongs to this driver, or fall back to first bus
@@ -53,7 +54,18 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onLogout }) 
   };
 
   return (
-    <div className="dashboard-container">
+    <div className="dashboard-container" style={{ position: 'relative', overflow: 'hidden' }}>
+      <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, pointerEvents: 'none', zIndex: 0, opacity: 0.65 }}>
+        <Silk
+          speed={5}
+          scale={1}
+          color="#2185D5"
+          noiseIntensity={1.5}
+          rotation={0}
+        />
+      </div>
+      
+      <div style={{ position: 'relative', zIndex: 1 }}>
       {/* Header */}
       <header className="dashboard-header">
         <div className="header-brand">
@@ -201,6 +213,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onLogout }) 
             <p>Updates are synchronized instantly to the Student Portal without reloading.</p>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

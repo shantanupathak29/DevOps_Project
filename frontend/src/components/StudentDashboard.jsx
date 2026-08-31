@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Silk from './Silk';
 
 export default function StudentDashboard({ user, buses, onLogout }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -24,7 +25,19 @@ export default function StudentDashboard({ user, buses, onLogout }) {
   }, 0);
 
   return (
-    <div className="dashboard-container">
+    <div className="dashboard-container" style={{ position: 'relative', overflow: 'hidden' }}>
+      <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, pointerEvents: 'none', zIndex: 0, opacity: 0.65 }}>
+        <Silk
+          speed={5}
+          scale={1}
+          color="#2185D5"
+          noiseIntensity={1.5}
+          rotation={0}
+        />
+      </div>
+      
+      {/* Content wrapper to force relative z-index above LightRays background */}
+      <div style={{ position: 'relative', zIndex: 1 }}>
       {/* Header */}
       <header className="dashboard-header">
         <div className="header-brand">
@@ -306,6 +319,7 @@ export default function StudentDashboard({ user, buses, onLogout }) {
             )}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
