@@ -41,7 +41,6 @@ export default function Login({ onLogin }) {
       {/* Login card sits above the canvas */}
       <div className="login-card" style={{ position: 'relative', zIndex: 2 }}>
         <div className="logo-container">
-          <div className="logo-icon-text">CR</div>
           <div className="title">
             <h2>CampusRide</h2>
           </div>
