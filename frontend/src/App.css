@@ -921,7 +921,6 @@ body {
   background: rgba(10, 15, 25, 0.45);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.3);
   margin-top: auto;
   width: 100%;

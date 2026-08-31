@@ -6,21 +6,21 @@ export default function Footer() {
       name: 'Aarav',
       role: 'Full Stack Dev',
       initials: 'A',
-      linkedin: 'https://www.linkedin.com/in/aarav',
+      linkedin: 'https://www.linkedin.com/in/aaravsaxena26/',
       color: '#38bdf8' // Cyan
     },
     {
       name: 'Sahaj',
       role: 'DevOps & Backend',
       initials: 'S',
-      linkedin: 'https://www.linkedin.com/in/sahaj',
+      linkedin: 'https://www.linkedin.com/in/sahaj-parikh-abz/',
       color: '#818cf8' // Indigo
     },
     {
       name: 'Shantanu',
       role: 'Frontend & UI/UX',
       initials: 'SP',
-      linkedin: 'https://www.linkedin.com/in/shantanupathak29',
+      linkedin: 'https://www.linkedin.com/in/shantanupathak29/',
       color: '#34d399' // Emerald
     }
   ];
