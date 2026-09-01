@@ -5,23 +5,23 @@ export default function Footer() {
     {
       name: 'Aarav',
       role: 'Full Stack Dev',
-      initials: 'A',
+      initials: 'AA',
       linkedin: 'https://www.linkedin.com/in/aaravsaxena26/',
       color: '#38bdf8' // Cyan
     },
     {
       name: 'Sahaj',
       role: 'DevOps & Backend',
-      initials: 'S',
+      initials: 'SA',
       linkedin: 'https://www.linkedin.com/in/sahaj-parikh-abz/',
-      color: '#818cf8' // Indigo
+      color: '#38bdf8' // Cyan
     },
     {
       name: 'Shantanu',
       role: 'Frontend & UI/UX',
-      initials: 'SP',
+      initials: 'SH',
       linkedin: 'https://www.linkedin.com/in/shantanupathak29/',
-      color: '#34d399' // Emerald
+      color: '#38bdf8' // Cyan
     }
   ];
 
@@ -29,7 +29,7 @@ export default function Footer() {
     <footer className="app-footer" role="contentinfo" aria-label="Site footer">
       <div className="footer-glow-bar" />
       <div className="footer-container">
-        
+
         {/* Left: Brand & Copyright */}
         <div className="footer-left">
           <div className="footer-brand-badge">
