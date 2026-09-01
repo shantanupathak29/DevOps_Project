@@ -18,7 +18,7 @@ const INITIAL_BUSES = [
     driver: "DRIVER01",
     seatsAvailable: 14,
     totalCapacity: 30,
-    status: "In-Transit",
+    status: "Active",
     nextStop: "Bidholi",
     eta: "15 mins"
   },

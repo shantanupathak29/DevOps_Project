@@ -95,6 +95,17 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onLogout }) 
                   >
                     +
                   </button>
+                  <button
+                    type="button"
+                    style={{ marginLeft: '12px', padding: '6px 12px', background: 'transparent', border: '1px solid #ef4444', color: '#ef4444', fontSize: '12px', borderRadius: '6px', cursor: 'pointer' }}
+                    onClick={() => {
+                      setSeats(0);
+                      onUpdateBus(driverBus.id, { seatsAvailable: 0 });
+                    }}
+                    disabled={status === 'Out of Service'}
+                  >
+                    Reset to 0
+                  </button>
                 </div>
                 <div className="progress-bar-container driver-progress">
                   <div

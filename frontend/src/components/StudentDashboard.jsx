@@ -163,6 +163,21 @@ export default function StudentDashboard({ user, buses, onLogout }) {
                       </div>
 
                       <div className="card-actions">
+                        {bus.status === 'Active' && (
+                          <button 
+                            className="btn-action-primary" 
+                            style={{ marginRight: '8px', padding: '6px 12px', background: '#2185d5', border: 'none', color: '#fff', fontSize: '12px', fontWeight: '600', borderRadius: '6px', cursor: 'pointer' }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const sapId = window.prompt(`Enter your SAP ID to book a ride on ${bus.busNo}:`);
+                              if (sapId) {
+                                alert(`Ride booked successfully for SAP ID: ${sapId} on ${bus.busNo}`);
+                              }
+                            }}
+                          >
+                            Book Ride
+                          </button>
+                        )}
                         <button className="btn-action-outline">Track Route</button>
                       </div>
                     </div>
