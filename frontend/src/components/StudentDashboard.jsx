@@ -66,7 +66,7 @@ export default function StudentDashboard({ user, buses, onLogout }) {
             </div>
             <div className="stat-content">
               <h3>Active Routes</h3>
-              <p className="stat-number">3</p>
+              <p className="stat-number">2</p>
             </div>
           </div>
         </section>
@@ -80,7 +80,7 @@ export default function StudentDashboard({ user, buses, onLogout }) {
                 <svg className="search-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 <input
                   type="text"
-                  placeholder="Search by bus number, route or stop..."
+                  placeholder="Search by bus number, route (Kandoli / Bidholi)..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -89,9 +89,9 @@ export default function StudentDashboard({ user, buses, onLogout }) {
                 <label>Status:</label>
                 <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
                   <option value="All">All Statuses</option>
-                  <option value="Active">Active</option>
                   <option value="In-Transit">In-Transit</option>
                   <option value="Delayed">Delayed</option>
+                  <option value="Active">Active</option>
                   <option value="Out of Service">Out of Service</option>
                 </select>
               </div>
@@ -123,7 +123,7 @@ export default function StudentDashboard({ user, buses, onLogout }) {
                           </div>
                           <div>
                             <h4>{bus.busNo}</h4>
-                            <p className="bus-route-text">{bus.route}</p>
+                            <p className="bus-route-text">{bus.route} ({bus.departureTime})</p>
                           </div>
                         </div>
                         <span className={`status-badge status-${bus.status.toLowerCase().replace(' ', '-')}`}>
@@ -137,7 +137,7 @@ export default function StudentDashboard({ user, buses, onLogout }) {
                           <span className="value">{bus.nextStop}</span>
                         </div>
                         <div className="detail-item">
-                          <span className="label">ETA</span>
+                          <span className="label">ETA (2 km)</span>
                           <span className="value highlighted">{bus.eta}</span>
                         </div>
                       </div>
@@ -175,8 +175,8 @@ export default function StudentDashboard({ user, buses, onLogout }) {
           {/* Right: Campus Map */}
           <div className="dashboard-right">
             <div className="map-card">
-              <h3>Live Campus Map and Routes</h3>
-              <p className="map-desc">Select a bus on the left to highlight its current stop and pathway.</p>
+              <h3>Live Campus Map (2 Stops: Kandoli & Bidholi)</h3>
+              <p className="map-desc">Select a bus on the left to highlight its current pathway between Kandoli & Bidholi.</p>
 
               <div className="svg-map-wrapper">
                 <svg viewBox="0 0 500 400" className="campus-svg-map">
@@ -192,62 +192,137 @@ export default function StudentDashboard({ user, buses, onLogout }) {
                     {[50,100,150,200,250,300,350].map(y => <line key={y} x1="0" y1={y} x2="500" y2={y} />)}
                   </g>
 
-                  <path d="M 50,200 Q 150,50 300,100 T 450,200 T 250,350 Z" fill="none" stroke="#3a4750" strokeWidth="6" strokeLinecap="round" opacity="0.5" />
+                  {/* Route lines */}
+                  {/* Top Curve: Kandoli -> Bidholi */}
+                  <path
+                    d="M 70,185 Q 250,90 430,185"
+                    fill="none"
+                    stroke={selectedBus && selectedBus.route.includes('Kandoli → Bidholi') ? '#2185d5' : '#3a4750'}
+                    strokeWidth={selectedBus && selectedBus.route.includes('Kandoli → Bidholi') ? '5' : '4'}
+                    strokeLinecap="round"
+                    opacity={selectedBus && !selectedBus.route.includes('Kandoli → Bidholi') ? '0.3' : '0.8'}
+                    className={selectedBus && selectedBus.route.includes('Kandoli → Bidholi') ? 'animated-route-line' : ''}
+                  />
 
-                  {selectedBus && (
-                    <path d="M 50,200 Q 150,50 300,100 T 450,200 T 250,350 Z" fill="none" stroke="#2185d5" strokeWidth="4" strokeLinecap="round" className="animated-route-line" />
-                  )}
+                  {/* Bottom Curve: Bidholi -> Kandoli */}
+                  <path
+                    d="M 430,215 Q 250,310 70,215"
+                    fill="none"
+                    stroke={selectedBus && selectedBus.route.includes('Bidholi → Kandoli') ? '#2185d5' : '#3a4750'}
+                    strokeWidth={selectedBus && selectedBus.route.includes('Bidholi → Kandoli') ? '5' : '4'}
+                    strokeLinecap="round"
+                    opacity={selectedBus && !selectedBus.route.includes('Bidholi → Kandoli') ? '0.3' : '0.8'}
+                    className={selectedBus && selectedBus.route.includes('Bidholi → Kandoli') ? 'animated-route-line' : ''}
+                  />
 
-                  <g transform="translate(50, 200)" className="map-node">
-                    <circle r="12" fill="#303841" stroke="#3a4750" strokeWidth="2" />
-                    <circle r="6" fill="#10b981" />
-                    <text y="-18" textAnchor="middle" fill="#f3f3f3" fontSize="10" fontWeight="bold">Main Gate</text>
-                  </g>
-                  <g transform="translate(200, 95)" className="map-node">
-                    <circle r="12" fill="#303841" stroke="#3a4750" strokeWidth="2" />
-                    <circle r="6" fill={selectedBus && selectedBus.nextStop.includes('Hostel') ? '#2185d5' : '#94a3b8'} />
-                    <text y="-18" textAnchor="middle" fill="#f3f3f3" fontSize="10">Hostels</text>
-                  </g>
-                  <g transform="translate(340, 115)" className="map-node">
-                    <circle r="12" fill="#303841" stroke="#3a4750" strokeWidth="2" />
-                    <circle r="6" fill={selectedBus && selectedBus.nextStop.includes('Science') ? '#2185d5' : '#94a3b8'} />
-                    <text y="-18" textAnchor="middle" fill="#f3f3f3" fontSize="10">Science Block</text>
-                  </g>
-                  <g transform="translate(450, 200)" className="map-node">
-                    <circle r="12" fill="#303841" stroke="#3a4750" strokeWidth="2" />
-                    <circle r="6" fill={selectedBus && selectedBus.nextStop.includes('Library') ? '#2185d5' : '#94a3b8'} />
-                    <text x="18" y="4" fill="#f3f3f3" fontSize="10">Library</text>
-                  </g>
-                  <g transform="translate(250, 350)" className="map-node">
-                    <circle r="12" fill="#303841" stroke="#3a4750" strokeWidth="2" />
-                    <circle r="6" fill={selectedBus && selectedBus.nextStop.includes('Admin') ? '#2185d5' : '#94a3b8'} />
-                    <text y="22" textAnchor="middle" fill="#f3f3f3" fontSize="10">Admin Bldg</text>
+                  {/* Distance & Route Labels */}
+                  <text x="250" y="70" textAnchor="middle" fill="#60b5ff" fontSize="10" fontWeight="bold">
+                    Kandoli → Bidholi (Way 1 • 5 Buses)
+                  </text>
+                  <text x="250" y="335" textAnchor="middle" fill="#34d399" fontSize="10" fontWeight="bold">
+                    Bidholi → Kandoli (Way 2 • 5 Buses)
+                  </text>
+                  <rect x="180" y="190" width="140" height="20" rx="10" fill="#1e293b" stroke="#3a4750" strokeWidth="1" />
+                  <text x="250" y="204" textAnchor="middle" fill="#94a3b8" fontSize="9" fontWeight="bold">
+                    2.0 km • 15-20 min ETA
+                  </text>
+
+                  {/* Stop 1: Kandoli */}
+                  <g transform="translate(70, 200)" className="map-node">
+                    <circle r="16" fill="#1e293b" stroke="#60b5ff" strokeWidth="2" />
+                    <circle r="8" fill="#2185d5" />
+                    <text y="-24" textAnchor="middle" fill="#ffffff" fontSize="12" fontWeight="bold">Kandoli Stop</text>
                   </g>
 
-                  {buses.map((bus, idx) => {
-                    if (bus.status === 'Out of Service') return null;
-                    let x = 120, y = 140;
-                    if (bus.nextStop.includes('Hostel')) { x = 170; y = 90; }
-                    else if (bus.nextStop.includes('Science')) { x = 320; y = 110; }
-                    else if (bus.nextStop.includes('Library')) { x = 430; y = 180; }
-                    else if (bus.nextStop.includes('Admin')) { x = 270; y = 330; }
+                  {/* Stop 2: Bidholi */}
+                  <g transform="translate(430, 200)" className="map-node">
+                    <circle r="16" fill="#1e293b" stroke="#34d399" strokeWidth="2" />
+                    <circle r="8" fill="#10b981" />
+                    <text y="-24" textAnchor="middle" fill="#ffffff" fontSize="12" fontWeight="bold">Bidholi Stop</text>
+                  </g>
+
+                  {/* Buses on Map */}
+                  {buses.map((bus) => {
+                    let x = 250;
+                    let y = 200;
+                    const isWay1 = bus.route.includes('Kandoli → Bidholi');
+                    const indexInWay = (bus.id - 1) % 5;
+                    const tValues = [0.15, 0.32, 0.50, 0.68, 0.85];
+                    const t = tValues[indexInWay] || 0.5;
+
+                    if (isWay1) {
+                      // Quadratic bezier formula for top curve: P0=(70,185), P1=(250,90), P2=(430,185)
+                      x = Math.round((1 - t) * (1 - t) * 70 + 2 * (1 - t) * t * 250 + t * t * 430);
+                      y = Math.round((1 - t) * (1 - t) * 185 + 2 * (1 - t) * t * 90 + t * t * 185);
+                    } else {
+                      // Quadratic bezier formula for bottom curve: P0=(430,215), P1=(250,310), P2=(70,215)
+                      x = Math.round((1 - t) * (1 - t) * 430 + 2 * (1 - t) * t * 250 + t * t * 70);
+                      y = Math.round((1 - t) * (1 - t) * 215 + 2 * (1 - t) * t * 310 + t * t * 215);
+                    }
+
                     const isBusSelected = selectedBus && selectedBus.id === bus.id;
+                    
+                    // Status Color map: In-Transit = Green (#10b981), Delayed = Red (#ef4444), Active = Blue (#2185d5)
+                    let statusColor = '#10b981';
+                    if (bus.status === 'Delayed') statusColor = '#ef4444';
+                    else if (bus.status === 'Active') statusColor = '#2185d5';
+
                     return (
-                      <g key={bus.id} transform={`translate(${x + (idx * 15)}, ${y})`} className={`map-bus-indicator ${isBusSelected ? 'active-bus' : ''}`}>
-                        <rect x="-16" y="-10" width="32" height="20" rx="4" fill={isBusSelected ? '#2185d5' : '#475569'} stroke="#f3f3f3" strokeWidth="1.5" />
-                        <text textAnchor="middle" y="4" fill="#ffffff" fontSize="8" fontWeight="bold">{bus.busNo.replace('BUS-', '')}</text>
-                        <circle cx="10" cy="10" r="3" fill="#000" />
-                        <circle cx="-10" cy="10" r="3" fill="#000" />
+                      <g
+                        key={bus.id}
+                        transform={`translate(${x}, ${y})`}
+                        className={`map-bus-indicator ${isBusSelected ? 'active-bus' : ''}`}
+                        onClick={() => setSelectedBus(bus)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        {isBusSelected && (
+                          <circle r="18" fill="none" stroke="#f59e0b" strokeWidth="2.5" opacity="0.9" />
+                        )}
+                        <rect
+                          x="-18"
+                          y="-11"
+                          width="36"
+                          height="22"
+                          rx="5"
+                          fill={statusColor}
+                          stroke={isBusSelected ? '#ffffff' : '#1e293b'}
+                          strokeWidth={isBusSelected ? '2' : '1.5'}
+                        />
+                        <text textAnchor="middle" y="4" fill="#ffffff" fontSize="9" fontWeight="bold">
+                          {bus.busNo.replace('BUS-', '')}
+                        </text>
+                        <circle cx="11" cy="11" r="3" fill="#0f172a" />
+                        <circle cx="-11" cy="11" r="3" fill="#0f172a" />
                       </g>
                     );
                   })}
                 </svg>
               </div>
 
+              {/* Status Color Legend */}
+              <div style={{ display: 'flex', gap: '16px', marginTop: '14px', alignItems: 'center', justifyContent: 'center', background: 'rgba(15, 23, 42, 0.6)', padding: '10px', borderRadius: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#f3f3f3' }}>
+                  <span style={{ width: '12px', height: '12px', borderRadius: '3px', backgroundColor: '#10b981', display: 'inline-block' }}></span>
+                  In-Transit
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#f3f3f3' }}>
+                  <span style={{ width: '12px', height: '12px', borderRadius: '3px', backgroundColor: '#ef4444', display: 'inline-block' }}></span>
+                  Delayed
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#f3f3f3' }}>
+                  <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '2px solid #f59e0b', display: 'inline-block' }}></span>
+                  Selected Bus
+                </div>
+              </div>
+
               {selectedBus && (
                 <div className="map-legend">
-                  <h4>Inspecting: {selectedBus.busNo}</h4>
-                  <p>Status: <span className="bold">{selectedBus.status}</span> | Next Stop: <span className="bold">{selectedBus.nextStop} ({selectedBus.eta})</span></p>
+                  <h4>Inspecting: {selectedBus.busNo} ({selectedBus.route})</h4>
+                  <p>
+                    Status: <span className="bold" style={{ color: selectedBus.status === 'Delayed' ? '#f87171' : '#34d399' }}>{selectedBus.status}</span> |
+                    Departure: <span className="bold">{selectedBus.departureTime}</span> |
+                    Next Stop: <span className="bold">{selectedBus.nextStop} (ETA: {selectedBus.eta})</span>
+                  </p>
                 </div>
               )}
             </div>

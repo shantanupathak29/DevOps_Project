@@ -34,11 +34,9 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onLogout }) 
   const handleStopChange = (e) => {
     const newStop = e.target.value;
     setNextStop(newStop);
-    let autoEta = '3 mins';
-    if (newStop.includes('Hostel')) autoEta = '8 mins';
-    else if (newStop.includes('Library')) autoEta = '12 mins';
-    else if (newStop.includes('Admin')) autoEta = '15 mins';
-    else if (newStop.includes('Gate')) autoEta = '5 mins';
+    let autoEta = '15 mins';
+    if (newStop.includes('Kandoli')) autoEta = '15 mins';
+    else if (newStop.includes('Bidholi')) autoEta = '18 mins';
     setEta(autoEta);
     onUpdateBus(driverBus.id, { nextStop: newStop, eta: autoEta });
   };
@@ -114,9 +112,9 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onLogout }) 
               <div className="form-group">
                 <label htmlFor="bus-status">Bus Trip Status</label>
                 <select id="bus-status" value={status} onChange={handleStatusChange}>
-                  <option value="Active">Active</option>
                   <option value="In-Transit">In-Transit</option>
                   <option value="Delayed">Delayed</option>
+                  <option value="Active">Active</option>
                   <option value="Out of Service">Out of Service</option>
                 </select>
               </div>
@@ -125,11 +123,8 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onLogout }) 
               <div className="form-group">
                 <label htmlFor="next-stop">Next Campus Stop</label>
                 <select id="next-stop" value={nextStop} onChange={handleStopChange} disabled={status === 'Out of Service'}>
-                  <option value="Main Gate">Main Gate</option>
-                  <option value="Hostel Block C">Hostel Block C</option>
-                  <option value="Science Block">Science Block</option>
-                  <option value="Central Library">Central Library</option>
-                  <option value="Admin Building">Admin Building</option>
+                  <option value="Kandoli">Kandoli</option>
+                  <option value="Bidholi">Bidholi</option>
                 </select>
               </div>
 
