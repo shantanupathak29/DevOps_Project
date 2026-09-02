@@ -315,7 +315,7 @@ function App() {
     );
   };
 
-  const navigateTo404 = () => {
+  const _navigateTo404 = () => {
     setCurrentView('404');
     window.history.pushState(null, '', '/404');
   };
@@ -352,7 +352,7 @@ function App() {
           />
         )}
       </main>
-      <Footer onNavigate404={navigateTo404} currentView={currentView} />
+      <Footer />
     </div>
   );
 }

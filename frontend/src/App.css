@@ -959,6 +959,19 @@ body {
   gap: 8px;
 }
 
+.footer-logo-img {
+  height: 42px;
+  max-width: 180px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(33, 133, 213, 0.4));
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.footer-logo-img:hover {
+  transform: scale(1.04);
+  filter: drop-shadow(0 0 14px rgba(56, 189, 248, 0.7));
+}
+
 .footer-logo-icon {
   color: var(--primary);
   filter: drop-shadow(0 0 8px rgba(33, 133, 213, 0.6));
@@ -1024,6 +1037,11 @@ body {
   flex-wrap: wrap;
 }
 
+.dev-chip-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
 .dev-chip {
   display: inline-flex;
   align-items: center;
@@ -1036,13 +1054,14 @@ body {
   color: #cbd5e1;
   font-size: 12.5px;
   font-weight: 600;
+  cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 12px rgba(0, 0, 0, 0.15);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
 
-.dev-chip:hover {
+.dev-chip-wrapper:hover .dev-chip {
   background: rgba(33, 133, 213, 0.18);
   border-color: rgba(33, 133, 213, 0.45);
   color: #ffffff;
@@ -1063,12 +1082,131 @@ body {
   transition: transform 0.2s ease;
 }
 
-.dev-chip:hover .dev-avatar {
+.dev-chip-wrapper:hover .dev-avatar {
   transform: scale(1.1);
 }
 
 .dev-name {
   letter-spacing: 0.2px;
+}
+
+.dev-popover {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%) translateY(8px) scale(0.94);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(15, 23, 42, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 14px;
+  padding: 14px;
+  width: 260px;
+  z-index: 1000;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65), 0 0 24px rgba(56, 189, 248, 0.18);
+  text-align: left;
+}
+
+.dev-popover::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 7px;
+  border-style: solid;
+  border-color: rgba(15, 23, 42, 0.96) transparent transparent transparent;
+}
+
+.dev-chip-wrapper:hover .dev-popover {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+.dev-popover-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.dev-popover-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  border: 1.5px solid;
+  flex-shrink: 0;
+}
+
+.dev-popover-name {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.dev-popover-role {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dev-popover-bio {
+  margin: 0 0 12px 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #cbd5e1;
+}
+
+.dev-popover-links {
+  display: flex;
+  gap: 8px;
+}
+
+.dev-social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.dev-social-link.linkedin {
+  background: rgba(10, 102, 194, 0.2);
+  color: #38bdf8;
+  border: 1px solid rgba(10, 102, 194, 0.45);
+}
+
+.dev-social-link.linkedin:hover {
+  background: rgba(10, 102, 194, 0.45);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.dev-social-link.github {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f1f5f9;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dev-social-link.github:hover {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  transform: translateY(-1px);
 }
 
 .linkedin-icon {
