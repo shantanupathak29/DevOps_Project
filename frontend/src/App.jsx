@@ -254,6 +254,20 @@ function App() {
   };
 
   const handleBoardStudent = (busId, studentData) => {
+    const sapIdToCheck = (studentData.sapId || '500100000').trim();
+    let alreadyBoardedOnBus = null;
+
+    buses.forEach(b => {
+      if (b.boardedStudents && b.boardedStudents.some(s => s.sapId === sapIdToCheck)) {
+        alreadyBoardedOnBus = b.busNo;
+      }
+    });
+
+    if (alreadyBoardedOnBus) {
+      alert(`Student with SAP ID ${sapIdToCheck} is already boarded on bus ${alreadyBoardedOnBus}. Please deboard first.`);
+      return false; // Indicates failure
+    }
+
     setBuses((prevBuses) =>
       prevBuses.map((bus) => {
         if (bus.id === busId) {
@@ -263,7 +277,7 @@ function App() {
           const newStudent = {
             id: `s-${busId}-${Date.now()}`,
             name: studentData.name || 'Student',
-            sapId: studentData.sapId || '500100000',
+            sapId: sapIdToCheck,
             boardingTime: studentData.boardingTime || defaultTime,
             from: studentData.from || (bus.route.includes('Kandoli → Bidholi') ? 'Kandoli' : 'Bidholi'),
             to: studentData.to || (bus.route.includes('Kandoli → Bidholi') ? 'Bidholi' : 'Kandoli'),
@@ -280,6 +294,8 @@ function App() {
         return bus;
       })
     );
+    
+    return true; // Indicates success
   };
 
   const handleDeboardStudent = (busId, studentId) => {

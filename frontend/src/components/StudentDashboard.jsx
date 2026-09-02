@@ -186,16 +186,19 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
                                 const fromStop = bus.route.includes('Kandoli → Bidholi') ? 'Kandoli' : 'Bidholi';
                                 const toStop = bus.route.includes('Kandoli → Bidholi') ? 'Bidholi' : 'Kandoli';
                                 if (onBoardStudent) {
-                                  onBoardStudent(bus.id, {
+                                  const success = onBoardStudent(bus.id, {
                                     name: user ? user.username : 'Student',
                                     sapId: sapId.trim(),
                                     from: fromStop,
                                     to: toStop
                                   });
+                                  if (success) {
+                                    alert(`Ride booked & boarded successfully! SAP ID: ${sapId} on ${bus.busNo} (${fromStop} ➔ ${toStop})`);
+                                  }
                                 } else {
                                   onUpdateBus(bus.id, { seatsAvailable: Math.max(0, bus.seatsAvailable - 1) });
+                                  alert(`Ride booked & boarded successfully! SAP ID: ${sapId} on ${bus.busNo} (${fromStop} ➔ ${toStop})`);
                                 }
-                                alert(`Ride booked & boarded successfully! SAP ID: ${sapId} on ${bus.busNo} (${fromStop} ➔ ${toStop})`);
                               }
                             }}
                           >

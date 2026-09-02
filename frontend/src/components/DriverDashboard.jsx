@@ -78,13 +78,18 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
     const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     if (onBoardStudent) {
-      onBoardStudent(driverBus.id, {
+      const success = onBoardStudent(driverBus.id, {
         name: newStudentName.trim(),
         sapId: newStudentSap.trim(),
         boardingTime: timeStr,
         from: newStudentFrom,
         to: newStudentTo
       });
+      
+      if (!success) {
+        // Validation failed (e.g. duplicate SAP ID), don't close modal or reset form
+        return;
+      }
     }
 
     // Reset Form
