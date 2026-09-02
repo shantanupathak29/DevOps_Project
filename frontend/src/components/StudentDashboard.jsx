@@ -47,6 +47,11 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
         {/* Header */}
         <header className="dashboard-header">
           <div className="header-brand">
+            <img
+              src="/campusride-logo.png"
+              alt="CampusRide Logo"
+              style={{ width: '38px', height: '38px', objectFit: 'contain', borderRadius: '8px', marginRight: '10px' }}
+            />
             <h1>CampusRide</h1>
             <span className="badge badge-student">Student Portal</span>
           </div>
@@ -375,10 +380,11 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
 
                     const isBusSelected = selectedBus && selectedBus.id === bus.id;
                     
-                    // Status Color map: In-Transit = Green (#10b981), Delayed = Red (#ef4444), Active = Blue (#2185d5)
+                    // Status Color map: In-Transit = Green (#10b981), Delayed = Red (#ef4444), Active = Blue (#2185d5), Out of Service = Grey (#64748b)
                     let statusColor = '#10b981';
                     if (bus.status === 'Delayed') statusColor = '#ef4444';
                     else if (bus.status === 'Active') statusColor = '#2185d5';
+                    else if (bus.status === 'Out of Service') statusColor = '#64748b';
 
                     return (
                       <g
@@ -413,7 +419,7 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
               </div>
 
               {/* Status Color Legend */}
-              <div style={{ display: 'flex', gap: '16px', marginTop: '14px', alignItems: 'center', justifyContent: 'center', background: 'rgba(15, 23, 42, 0.6)', padding: '10px', borderRadius: '10px' }}>
+              <div style={{ display: 'flex', gap: '14px', marginTop: '14px', alignItems: 'center', justifyContent: 'center', background: 'rgba(15, 23, 42, 0.6)', padding: '10px 14px', borderRadius: '10px', flexWrap: 'wrap' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#f3f3f3' }}>
                   <span style={{ width: '12px', height: '12px', borderRadius: '3px', backgroundColor: '#10b981', display: 'inline-block' }}></span>
                   In-Transit
@@ -421,6 +427,10 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#f3f3f3' }}>
                   <span style={{ width: '12px', height: '12px', borderRadius: '3px', backgroundColor: '#ef4444', display: 'inline-block' }}></span>
                   Delayed
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#f3f3f3' }}>
+                  <span style={{ width: '12px', height: '12px', borderRadius: '3px', backgroundColor: '#64748b', display: 'inline-block' }}></span>
+                  Out of Service
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#f3f3f3' }}>
                   <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '2px solid #f59e0b', display: 'inline-block' }}></span>
@@ -432,7 +442,7 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
                 <div className="map-legend">
                   <h4>Inspecting: {selectedBus.busNo} ({selectedBus.route})</h4>
                   <p>
-                    Status: <span className="bold" style={{ color: selectedBus.status === 'Delayed' ? '#f87171' : '#34d399' }}>{selectedBus.status}</span> | 
+                    Status: <span className="bold" style={{ color: selectedBus.status === 'Delayed' ? '#f87171' : selectedBus.status === 'Out of Service' ? '#94a3b8' : '#34d399' }}>{selectedBus.status}</span> | 
                     Departure: <span className="bold">{selectedBus.departureTime}</span> | 
                     Next Stop: <span className="bold">{selectedBus.nextStop} (ETA: {selectedBus.eta})</span>
                   </p>

@@ -128,6 +128,11 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
         {/* Header */}
         <header className="dashboard-header">
           <div className="header-brand">
+            <img
+              src="/campusride-logo.png"
+              alt="CampusRide Logo"
+              style={{ width: '38px', height: '38px', objectFit: 'contain', borderRadius: '8px', marginRight: '10px' }}
+            />
             <h1>CampusRide</h1>
             <span className="badge badge-driver">Driver Portal</span>
           </div>

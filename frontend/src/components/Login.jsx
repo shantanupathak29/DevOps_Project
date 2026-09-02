@@ -41,6 +41,11 @@ export default function Login({ onLogin }) {
       {/* Login card sits above the canvas */}
       <div className="login-card" style={{ position: 'relative', zIndex: 2 }}>
         <div className="logo-container">
+          <img
+            src="/campusride-logo.png"
+            alt="CampusRide Logo"
+            className="login-logo-img"
+          />
           <div className="title">
             <h2>CampusRide</h2>
           </div>
@@ -74,17 +79,17 @@ export default function Login({ onLogin }) {
           <div className="btn-group">
             <button
               type="submit"
-              onClick={(e) => handleSubmit(e, 'student')}
-              className="btn btn-student"
-            >
-              Student Login
-            </button>
-            <button
-              type="submit"
               onClick={(e) => handleSubmit(e, 'driver')}
               className="btn btn-driver"
             >
               Driver Login
+            </button>
+            <button
+              type="submit"
+              onClick={(e) => handleSubmit(e, 'student')}
+              className="btn btn-student"
+            >
+              Student Login
             </button>
           </div>
         </form>
