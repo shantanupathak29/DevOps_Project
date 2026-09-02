@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - Lost on Campus | CampusRide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2185d5;
+      --primary-hover: #176faf;
+      --bg-dark: #303841;
+      --card-bg: rgba(48, 56, 65, 0.7);
+      --text-light: #f3f3f3;
+      --text-muted: #9ca3af;
+      --border-light: rgba(243, 243, 243, 0.1);
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-sans);
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 30px 20px 60px;
+      overflow-x: hidden;
+      background: radial-gradient(circle at center top, #1e293b 0%, #0f172a 100%);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+    }
+
+    /* Header */
+    .header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 24px;
+      background: rgba(48, 56, 65, 0.6);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .brand-icon {
+      font-size: 26px;
+    }
+
+    .brand-text {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 0%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .status-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      color: #fca5a5;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+
+    .status-ping {
+      width: 8px;
+      height: 8px;
+      background: #ef4444;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #ef4444;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.75; }
+      50% { opacity: 1; }
+    }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      max-width: 680px;
+    }
+
+    .hero-code {
+      font-size: clamp(72px, 14vw, 120px);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -2px;
+      margin: 0;
+      background: linear-gradient(180deg, #ffffff 20%, #2185d5 70%, #0284c7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 40px rgba(33, 133, 213, 0.4);
+    }
+
+    .hero-title {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 800;
+      color: #f3f3f3;
+      letter-spacing: -0.5px;
+      margin: 0 0 12px 0;
+    }
+
+    .hero-desc {
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    .hero-desc strong {
+      color: #38bdf8;
+    }
+
+    /* Arcade Cabinet */
+    .arcade-cabinet {
+      width: 100%;
+      background: linear-gradient(160deg, #2a323d 0%, #1a2027 100%);
+      border-radius: 20px;
+      padding: 12px;
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(33, 133, 213, 0.2);
+    }
+
+    .arcade-bezel {
+      background: #0f172a;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 2px solid #1e293b;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+    }
+
+    .arcade-screen-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: #1e293b;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .screen-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .screen-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .screen-dot.red { background: #ef4444; }
+    .screen-dot.yellow { background: #f59e0b; }
+    .screen-dot.green { background: #10b981; }
+
+    .screen-title {
+      font-family: monospace;
+      font-size: 12px;
+      color: #94a3b8;
+      letter-spacing: 1px;
+    }
+
+    .screen-fps {
+      font-family: monospace;
+      font-size: 11px;
+      color: #38bdf8;
+      font-weight: 700;
+    }
+
+    .arcade-game-area {
+      padding: 12px;
+      background: #111827;
+      position: relative;
+    }
+
+    /* Game HUD */
+    .trex-hud {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 12px;
+      background: rgba(30, 41, 59, 0.7);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      margin-bottom: 10px;
+    }
+
+    .trex-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #38bdf8;
+      letter-spacing: 1.2px;
+      font-family: monospace;
+    }
+
+    .trex-scores {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-family: 'Courier New', Courier, monospace;
+      font-weight: 800;
+      font-size: 17px;
+      letter-spacing: 2px;
+    }
+
+    .trex-hi-score { color: #64748b; }
+    .trex-current-score { color: #f3f3f3; }
+
+    .trex-hud-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #cbd5e1;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    /* Canvas */
+    .trex-canvas-wrapper {
+      position: relative;
+      width: 100%;
+      height: 220px;
+      background: linear-gradient(180deg, #090d16 0%, #131b2a 100%);
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    #gameCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Overlays */
+    .trex-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      text-align: center;
+    }
+
+    .trex-overlay.hidden {
+      display: none !important;
+    }
+
+    .trex-play-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #2185d5;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin: 0 auto 12px;
+      box-shadow: 0 0 20px rgba(33, 133, 213, 0.6);
+    }
+
+    .kbd-badge {
+      display: inline-block;
+      background: #1e293b;
+      border: 1px solid #475569;
+      border-radius: 6px;
+      padding: 2px 8px;
+      color: #38bdf8;
+      font-family: monospace;
+      font-weight: 700;
+    }
+
+    .gameover-title {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 4px;
+      color: #ef4444;
+      text-shadow: 0 0 16px rgba(239, 68, 68, 0.6);
+      margin-bottom: 8px;
+    }
+
+    .trex-restart-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #2185d5;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 12px;
+    }
+
+    /* Bottom Controls */
+    .trex-controls-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 4px 4px;
+    }
+
+    .key-hint {
+      font-size: 12px;
+      color: #94a3b8;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-right: 10px;
+    }
+
+    .key-hint kbd {
+      background: #1e293b;
+      border: 1px solid #475569;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 11px;
+      color: #f3f3f3;
+      font-family: monospace;
+    }
+
+    .touch-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .touch-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #f3f3f3;
+      background: rgba(255, 255, 255, 0.08);
+      user-select: none;
+    }
+
+    .touch-btn.jump {
+      background: rgba(33, 133, 213, 0.35);
+      color: #38bdf8;
+      border-color: rgba(56, 189, 248, 0.4);
+    }
+
+    /* Action Buttons */
+    .actions {
+      display: flex;
+      gap: 16px;
+      width: 100%;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    }
+
+    .btn-secondary {
+      background: rgba(48, 56, 65, 0.8);
+      color: #f3f3f3;
+      border: 1px solid rgba(243, 243, 243, 0.15);
+    }
+
+    /* Tips */
+    .tips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      width: 100%;
+    }
+
+    .tip-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 18px 20px;
+      background: rgba(48, 56, 65, 0.55);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(243, 243, 243, 0.08);
+      border-radius: 14px;
+    }
+
+    .tip-icon { font-size: 24px; }
+    .tip-text h4 { margin-bottom: 4px; font-size: 14px; color: #f3f3f3; }
+    .tip-text p { font-size: 12px; line-height: 1.5; color: var(--text-muted); }
+
+    @media (max-width: 640px) {
+      .trex-canvas-wrapper { height: 180px; }
+      .actions { flex-direction: column; }
+      .btn { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <a href="/" class="brand">
+        <span class="brand-icon">🚌</span>
+        <span class="brand-text">CampusRide</span>
+      </a>
+      <div class="status-tag">
+        <span class="status-ping"></span>
+        <span>ERROR 404 &bull; ROUTE LOST</span>
+      </div>
+    </header>
+
+    <!-- Hero -->
+    <div class="hero">
+      <h1 class="hero-code">404</h1>
+      <h2 class="hero-title">Bus Route Not Found</h2>
+      <p class="hero-desc">
+        Looks like you've wandered off the official campus route or this stop doesn't exist.
+        While our dispatch team recalculates the route, play the <strong>Campus T-Rex Runner</strong>!
+      </p>
+    </div>
+
+    <!-- Arcade Cabinet -->
+    <div class="arcade-cabinet">
+      <div class="arcade-bezel">
+        <div class="arcade-screen-header">
+          <div class="screen-dots">
+            <span class="screen-dot red"></span>
+            <span class="screen-dot yellow"></span>
+            <span class="screen-dot green"></span>
+          </div>
+          <div class="screen-title">CAMPUS_BUS_OFFLINE_RUNNER.EXE</div>
+          <div class="screen-fps">60 FPS</div>
+        </div>
+
+        <div class="arcade-game-area">
+          <div class="trex-hud">
+            <div class="trex-badge">
+              <span class="status-ping" style="background:#38bdf8; box-shadow:0 0 8px #38bdf8;"></span>
+              <span>CAMPUS RUNNER 404</span>
+            </div>
+            <div class="trex-scores">
+              <span class="trex-hi-score" id="hiScoreText">HI 00000</span>
+              <span class="trex-current-score" id="scoreText">00000</span>
+            </div>
+            <button class="trex-hud-btn" id="muteBtn" title="Toggle Sound">🔊</button>
+          </div>
+
+          <div class="trex-canvas-wrapper" id="canvasWrapper">
+            <canvas id="gameCanvas"></canvas>
+
+            <!-- Start Overlay -->
+            <div class="trex-overlay" id="startOverlay">
+              <div>
+                <div class="trex-play-icon">▶</div>
+                <h3 style="margin-bottom:6px;">Press <span class="kbd-badge">SPACE</span> or Tap to Start</h3>
+                <p style="font-size:13px; color:#94a3b8;">Jump over campus obstacles & duck under pterodactyls!</p>
+              </div>
+            </div>
+
+            <!-- Game Over Overlay -->
+            <div class="trex-overlay hidden" id="gameOverOverlay">
+              <div>
+                <div class="gameover-title">G A M E &nbsp; O V E R</div>
+                <p style="font-size:15px; color:#cbd5e1; margin-bottom:12px;">Final Score: <strong id="finalScoreVal">0</strong></p>
+                <button class="trex-restart-btn" id="restartBtn">🔄 Play Again (Space)</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="trex-controls-bottom">
+            <div>
+              <span class="key-hint"><kbd>Space</kbd> / <kbd>▲</kbd> Jump</span>
+              <span class="key-hint"><kbd>▼</kbd> Duck</span>
+            </div>
+            <div class="touch-buttons">
+              <button class="touch-btn jump" id="touchJump">JUMP</button>
+              <button class="touch-btn" id="touchDuck">DUCK</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <a href="/" class="btn btn-primary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span>Return to Home / Dashboard</span>
+      </a>
+      <a href="/" class="btn btn-secondary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="3" width="15" height="13" rx="2"></rect><path d="M16 8h4l3 4v4h-7V8z"></path><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+        <span>View Bus Timetable</span>
+      </a>
+    </div>
+
+    <!-- Tips -->
+    <div class="tips-grid">
+      <div class="tip-card">
+        <div class="tip-icon">📍</div>
+        <div class="tip-text">
+          <h4>Kandoli &harr; Bidholi Express</h4>
+          <p>Buses run every 15 minutes between 8:00 AM and 6:00 PM with real-time seat tracking.</p>
+        </div>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">⚡</div>
+        <div class="tip-text">
+          <h4>Live Seat Availability</h4>
+          <p>Check empty seats before arriving at the bus terminal to save time during rush hours.</p>
+        </div>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">🎮</div>
+        <div class="tip-text">
+          <h4>Dino Pro-Tip</h4>
+          <p>Press <kbd>▼</kbd> (Down Arrow) mid-jump for a rapid drop-down to avoid tricky pterodactyls!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Audio synthesizer
+    let audioCtx = null;
+    let isMuted = false;
+    function getAudioCtx() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+    function playJumpSound() {
+      if (isMuted) return;
+      const ctx = getAudioCtx(); if (!ctx) return;
+      try {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(320, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(700, ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.12, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(); osc.stop(ctx.currentTime + 0.12);
+      } catch(e) {}
+    }
+    function playScoreSound() {
+      if (isMuted) return;
+      const ctx = getAudioCtx(); if (!ctx) return;
+      try {
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, now);
+        osc.frequency.setValueAtTime(880, now + 0.08);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.28);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(); osc.stop(now + 0.28);
+      } catch(e) {}
+    }
+    function playHitSound() {
+      if (isMuted) return;
+      const ctx = getAudioCtx(); if (!ctx) return;
+      try {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(140, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.25);
+        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(); osc.stop(ctx.currentTime + 0.25);
+      } catch(e) {}
+    }
+
+    // Canvas & Game Logic
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const startOverlay = document.getElementById('startOverlay');
+    const gameOverOverlay = document.getElementById('gameOverOverlay');
+    const scoreText = document.getElementById('scoreText');
+    const hiScoreText = document.getElementById('hiScoreText');
+    const finalScoreVal = document.getElementById('finalScoreVal');
+    const muteBtn = document.getElementById('muteBtn');
+
+    let highScore = parseInt(localStorage.getItem('campusride_trex_highscore') || '0', 10);
+    hiScoreText.textContent = 'HI ' + highScore.toString().padStart(5, '0');
+
+    muteBtn.addEventListener('click', () => {
+      isMuted = !isMuted;
+      muteBtn.textContent = isMuted ? '🔇' : '🔊';
+    });
+
+    let state = 'IDLE'; // 'IDLE', 'PLAYING', 'GAMEOVER'
+    let score = 0, distance = 0, speed = 6;
+    let groundY = 180;
+    let ducking = false;
+    let obstacles = [];
+    let clouds = [];
+    let stars = [];
+    let pebbles = [];
+    let nextObsTimer = 0;
+    let lastTime = 0;
+
+    const dino = {
+      x: 50, y: 0, width: 44, height: 47, vy: 0, isGrounded: true, legStep: 0, legTimer: 0
+    };
+
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      groundY = rect.height - 35;
+      dino.y = groundY - 47;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function startGame() {
+      state = 'PLAYING';
+      score = 0;
+      distance = 0;
+      speed = 6;
+      ducking = false;
+      dino.y = groundY - 47;
+      dino.vy = 0;
+      dino.isGrounded = true;
+      obstacles = [];
+      nextObsTimer = 60;
+      lastTime = performance.now();
+
+      const rect = canvas.getBoundingClientRect();
+      pebbles = [];
+      for (let i = 0; i < rect.width; i += 20) {
+        pebbles.push({ x: i + Math.random() * 15, y: groundY + 4 + Math.random() * 16, size: Math.random() > 0.6 ? 2 : 1 });
+      }
+      clouds = [
+        { x: rect.width * 0.3, y: 25, speed: 0.8 },
+        { x: rect.width * 0.7, y: 35, speed: 0.6 },
+        { x: rect.width * 1.1, y: 20, speed: 0.9 }
+      ];
+      stars = [];
+      for (let i = 0; i < 25; i++) {
+        stars.push({ x: Math.random() * rect.width, y: Math.random() * (groundY - 40), size: Math.random() > 0.7 ? 2 : 1, blink: Math.random() * 6 });
+      }
+
+      startOverlay.classList.add('hidden');
+      gameOverOverlay.classList.add('hidden');
+    }
+
+    function doJump() {
+      if (state === 'IDLE' || state === 'GAMEOVER') {
+        startGame();
+        return;
+      }
+      if (state === 'PLAYING' && dino.isGrounded && !ducking) {
+        dino.vy = -11.5;
+        dino.isGrounded = false;
+        playJumpSound();
+      }
+    }
+
+    function setDuck(isD) {
+      if (state !== 'PLAYING') return;
+      ducking = isD;
+      if (!dino.isGrounded && isD) dino.vy += 4;
+    }
+
+    // Events
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); doJump(); }
+      else if (e.code === 'ArrowDown') { e.preventDefault(); setDuck(true); }
+    });
+    window.addEventListener('keyup', (e) => {
+      if (e.code === 'ArrowDown') { e.preventDefault(); setDuck(false); }
+    });
+
+    document.getElementById('canvasWrapper').addEventListener('click', doJump);
+    document.getElementById('restartBtn').addEventListener('click', (e) => { e.stopPropagation(); startGame(); });
+
+    const touchJump = document.getElementById('touchJump');
+    const touchDuck = document.getElementById('touchDuck');
+    touchJump.addEventListener('pointerdown', (e) => { e.preventDefault(); doJump(); });
+    touchDuck.addEventListener('pointerdown', (e) => { e.preventDefault(); setDuck(true); });
+    touchDuck.addEventListener('pointerup', (e) => { e.preventDefault(); setDuck(false); });
+    touchDuck.addEventListener('pointerleave', () => setDuck(false));
+
+    function checkCollision(d, obs, isDuck) {
+      const dWidth = isDuck ? 55 : 38;
+      const dHeight = isDuck ? 28 : 42;
+      const dX = d.x + (isDuck ? 2 : 4);
+      const dY = d.y + (isDuck ? 19 : 2);
+      const inset = 4;
+      return (
+        dX < obs.x + obs.width - inset &&
+        dX + dWidth > obs.x + inset &&
+        dY < obs.y + obs.height - inset &&
+        dY + dHeight > obs.y + inset
+      );
+    }
+
+    function loop(time) {
+      const rect = canvas.getBoundingClientRect();
+      const width = rect.width;
+      const height = rect.height;
+      ctx.clearRect(0, 0, width, height);
+
+      // Stars
+      stars.forEach(s => {
+        s.blink += 0.04;
+        ctx.fillStyle = `rgba(255,255,255,${(0.3 + 0.4 * Math.sin(s.blink)).toFixed(2)})`;
+        ctx.fillRect(s.x, s.y, s.size, s.size);
+      });
+
+      // Clouds
+      ctx.fillStyle = 'rgba(255,255,255,0.18)';
+      clouds.forEach(c => {
+        c.x -= c.speed;
+        if (c.x < -60) { c.x = width + 40; c.y = 15 + Math.random() * 30; }
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, 14, 0, Math.PI*2);
+        ctx.arc(c.x + 12, c.y - 6, 12, 0, Math.PI*2);
+        ctx.arc(c.x + 26, c.y, 14, 0, Math.PI*2);
+        ctx.fill();
+      });
+
+      // Ground
+      ctx.strokeStyle = '#4b5563';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, groundY);
+      ctx.lineTo(width, groundY);
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(156,163,175,0.4)';
+      pebbles.forEach(p => {
+        if (state === 'PLAYING') {
+          p.x -= speed;
+          if (p.x < -10) { p.x = width + Math.random() * 20; p.y = groundY + 4 + Math.random() * 16; }
+        }
+        ctx.fillRect(p.x, p.y, p.size * 2, p.size);
+      });
+
+      if (state === 'PLAYING') {
+        const delta = Math.min((time - (lastTime || time)) / 16.66, 2.5);
+        lastTime = time;
+
+        distance += speed * delta;
+        const curScore = Math.floor(distance / 10);
+        if (curScore > 0 && Math.floor(curScore / 100) > Math.floor(score / 100)) {
+          playScoreSound();
+        }
+        score = curScore;
+        scoreText.textContent = score.toString().padStart(5, '0');
+
+        if (speed < 13) speed += 0.0012 * delta;
+
+        dino.y += dino.vy * delta;
+        dino.vy += 0.65 * delta;
+        if (dino.y >= groundY - dino.height) {
+          dino.y = groundY - dino.height;
+          dino.vy = 0;
+          dino.isGrounded = true;
+        }
+
+        dino.legTimer += delta;
+        if (dino.legTimer > 5) {
+          dino.legStep = (dino.legStep + 1) % 2;
+          dino.legTimer = 0;
+        }
+
+        nextObsTimer -= delta;
+        if (nextObsTimer <= 0) {
+          const types = ['cactus', 'cone'];
+          if (score > 120) types.push('ptero');
+          const t = types[Math.floor(Math.random() * types.length)];
+          if (t === 'cactus') {
+            obstacles.push({ type: 'cactus', x: width + 20, y: groundY - 35, width: 22, height: 35 });
+          } else if (t === 'cone') {
+            obstacles.push({ type: 'cone', x: width + 20, y: groundY - 30, width: 24, height: 30 });
+          } else {
+            obstacles.push({ type: 'ptero', x: width + 20, y: groundY - 42, width: 42, height: 30, wing: 0, wingTimer: 0 });
+          }
+          nextObsTimer = Math.max(55, 120 - speed * 3) + Math.random() * 50;
+        }
+
+        for (let i = obstacles.length - 1; i >= 0; i--) {
+          const obs = obstacles[i];
+          obs.x -= speed * delta;
+          if (obs.type === 'ptero') {
+            obs.wingTimer += delta;
+            if (obs.wingTimer > 8) { obs.wing = obs.wing === 0 ? 1 : 0; obs.wingTimer = 0; }
+          }
+          if (checkCollision(dino, obs, ducking)) {
+            state = 'GAMEOVER';
+            playHitSound();
+            gameOverOverlay.classList.remove('hidden');
+            finalScoreVal.textContent = score;
+            if (score > highScore) {
+              highScore = score;
+              localStorage.setItem('campusride_trex_highscore', highScore.toString());
+              hiScoreText.textContent = 'HI ' + highScore.toString().padStart(5, '0');
+            }
+            break;
+          }
+          if (obs.x + obs.width < -30) obstacles.splice(i, 1);
+        }
+      }
+
+      // Draw Obstacles
+      obstacles.forEach(obs => {
+        if (obs.type === 'cactus') {
+          ctx.fillStyle = '#38bdf8';
+          ctx.fillRect(obs.x + 7, obs.y, 8, obs.height);
+          ctx.fillRect(obs.x, obs.y + 10, 6, 6);
+          ctx.fillRect(obs.x + 16, obs.y + 12, 6, 6);
+        } else if (obs.type === 'cone') {
+          ctx.fillStyle = '#f97316';
+          ctx.beginPath();
+          ctx.moveTo(obs.x + obs.width / 2, obs.y);
+          ctx.lineTo(obs.x + obs.width, obs.y + obs.height - 4);
+          ctx.lineTo(obs.x, obs.y + obs.height - 4);
+          ctx.closePath();
+          ctx.fill();
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(obs.x + 6, obs.y + 10, obs.width - 12, 4);
+          ctx.fillStyle = '#ea580c';
+          ctx.fillRect(obs.x - 2, obs.y + obs.height - 4, obs.width + 4, 4);
+        } else if (obs.type === 'ptero') {
+          ctx.fillStyle = '#fbbf24';
+          ctx.fillRect(obs.x + 12, obs.y + 10, 18, 7);
+          ctx.fillRect(obs.x + 28, obs.y + 6, 12, 6);
+          ctx.beginPath();
+          if (obs.wing === 0) {
+            ctx.moveTo(obs.x + 14, obs.y + 10); ctx.lineTo(obs.x + 6, obs.y - 4); ctx.lineTo(obs.x + 24, obs.y + 10);
+          } else {
+            ctx.moveTo(obs.x + 14, obs.y + 12); ctx.lineTo(obs.x + 6, obs.y + 24); ctx.lineTo(obs.x + 24, obs.y + 12);
+          }
+          ctx.closePath();
+          ctx.fill();
+        }
+      });
+
+      // Draw Dino
+      ctx.fillStyle = state === 'GAMEOVER' ? '#ef4444' : '#2185d5';
+      if (ducking && dino.isGrounded) {
+        const dY = dino.y + 16;
+        ctx.fillRect(dino.x, dY + 8, 48, 16);
+        ctx.fillRect(dino.x + 36, dY + 2, 18, 12);
+        ctx.fillStyle = '#f3f3f3';
+        ctx.fillRect(dino.x + 44, dY + 4, 3, 3);
+        ctx.fillStyle = state === 'GAMEOVER' ? '#ef4444' : '#2185d5';
+        ctx.fillRect(dino.x - 6, dY + 10, 8, 6);
+        ctx.fillRect(dino.x + 12, dY + 24, 6, dino.legStep === 0 ? 6 : 3);
+        ctx.fillRect(dino.x + 28, dY + 24, 6, dino.legStep === 0 ? 3 : 6);
+      } else {
+        ctx.fillRect(dino.x + 8, dino.y + 14, 22, 22);
+        ctx.fillRect(dino.x + 18, dino.y, 22, 14);
+        ctx.fillRect(dino.x + 24, dino.y + 2, 18, 10);
+        ctx.fillStyle = state === 'GAMEOVER' ? '#000000' : '#ffffff';
+        ctx.fillRect(dino.x + 28, dino.y + 3, 3, 3);
+        ctx.fillStyle = state === 'GAMEOVER' ? '#ef4444' : '#2185d5';
+        ctx.fillRect(dino.x + 32, dino.y + 18, 8, 3);
+        ctx.fillRect(dino.x, dino.y + 20, 8, 8);
+        ctx.fillRect(dino.x - 6, dino.y + 24, 7, 5);
+        if (!dino.isGrounded) {
+          ctx.fillRect(dino.x + 12, dino.y + 36, 5, 8);
+          ctx.fillRect(dino.x + 22, dino.y + 36, 5, 8);
+        } else {
+          ctx.fillRect(dino.x + 12, dino.y + 36, 5, dino.legStep === 0 ? 11 : 6);
+          ctx.fillRect(dino.x + 22, dino.y + 36, 5, dino.legStep === 0 ? 6 : 11);
+        }
+      }
+
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>

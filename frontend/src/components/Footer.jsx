@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function Footer() {
+export default function Footer({ onNavigate404, currentView }) {
   const developers = [
     {
       name: 'Aarav',
@@ -58,6 +58,20 @@ export default function Footer() {
           <p className="footer-copy">
             &copy; 2026 <span className="highlight-text">CampusRide</span>. All rights reserved.
           </p>
+
+          {onNavigate404 && (
+            <>
+              <div className="footer-divider-dot" aria-hidden="true">•</div>
+              <button
+                type="button"
+                className="footer-404-link"
+                onClick={onNavigate404}
+                title="Test 404 Page & T-Rex Game"
+              >
+                🎮 {currentView === '404' ? '404 Active' : '404 Game'}
+              </button>
+            </>
+          )}
         </div>
 
         {/* Right: Developers & LinkedIn Links */}

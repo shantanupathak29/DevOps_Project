@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Silk from './Silk';
 
-export default function StudentDashboard({ user, buses, onLogout, onUpdateBus }) {
+export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, onBoardStudent }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [selectedBus, setSelectedBus] = useState(null);
@@ -163,7 +163,7 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus })
                       </div>
 
                       <div className="card-actions">
-                        {bus.status === 'Active' && (
+                        {bus.status !== 'Out of Service' && (
                           <button 
                             className="btn-action-primary" 
                             style={{ 
@@ -181,14 +181,25 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus })
                             disabled={bus.seatsAvailable === 0}
                             onClick={(e) => {
                               e.stopPropagation();
-                              const sapId = window.prompt(`Enter your SAP ID to book a ride on ${bus.busNo}:`);
+                              const sapId = window.prompt(`Enter your SAP ID to board ${bus.busNo} (${bus.route}):`, '500109999');
                               if (sapId) {
-                                onUpdateBus(bus.id, { seatsAvailable: Math.max(0, bus.seatsAvailable - 1) });
-                                alert(`Ride booked successfully for SAP ID: ${sapId} on ${bus.busNo}`);
+                                const fromStop = bus.route.includes('Kandoli → Bidholi') ? 'Kandoli' : 'Bidholi';
+                                const toStop = bus.route.includes('Kandoli → Bidholi') ? 'Bidholi' : 'Kandoli';
+                                if (onBoardStudent) {
+                                  onBoardStudent(bus.id, {
+                                    name: user ? user.username : 'Student',
+                                    sapId: sapId.trim(),
+                                    from: fromStop,
+                                    to: toStop
+                                  });
+                                } else {
+                                  onUpdateBus(bus.id, { seatsAvailable: Math.max(0, bus.seatsAvailable - 1) });
+                                }
+                                alert(`Ride booked & boarded successfully! SAP ID: ${sapId} on ${bus.busNo} (${fromStop} ➔ ${toStop})`);
                               }
                             }}
                           >
-                            {bus.seatsAvailable === 0 ? 'Locked (Full)' : 'Book Ride'}
+                            {bus.seatsAvailable === 0 ? 'Full' : 'Book / Board'}
                           </button>
                         )}
                         <button className="btn-action-outline">Track Route</button>
