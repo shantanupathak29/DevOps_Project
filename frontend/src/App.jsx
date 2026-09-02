@@ -263,6 +263,11 @@ function App() {
       }
     });
 
+    const targetBus = buses.find(b => b.id === busId);
+    if (targetBus && targetBus.status !== 'Active') {
+      return { success: false, message: `Booking is only allowed when the bus is Active (current status: ${targetBus.status}).` };
+    }
+
     if (alreadyBoardedOnBus) {
       return { success: false, message: `Student with SAP ID ${sapIdToCheck} is already boarded on bus ${alreadyBoardedOnBus}. Please deboard first.` };
     }

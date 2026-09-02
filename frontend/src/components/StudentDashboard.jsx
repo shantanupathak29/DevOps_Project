@@ -198,7 +198,7 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
                           <span className="value">{bus.nextStop}</span>
                         </div>
                         <div className="detail-item">
-                          <span className="label">ETA (2 km)</span>
+                          <span className="label">ETA (4 km)</span>
                           <span className="value highlighted">{bus.eta}</span>
                         </div>
                       </div>
@@ -251,7 +251,7 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
                           >
                             🛑 Deboard Ride
                           </button>
-                        ) : bus.status !== 'Out of Service' ? (
+                        ) : bus.status === 'Active' ? (
                           <button 
                             className="btn-action-primary" 
                             style={{ 
@@ -278,9 +278,29 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
                               });
                             }}
                           >
-                            {currentBoardedBus ? 'Ride Active' : bus.seatsAvailable === 0 ? 'Full' : 'Book / Board'}
+                            {currentBoardedBus ? 'Ride Active' : bus.seatsAvailable === 0 ? 'Full' : 'Book Ride'}
                           </button>
-                        ) : null}
+                        ) : (
+                          <button
+                            className="btn-action-outline"
+                            style={{
+                              marginRight: '6px',
+                              padding: '6px 10px',
+                              fontSize: '11px',
+                              fontWeight: '600',
+                              borderColor: '#475569',
+                              color: '#94a3b8',
+                              background: 'rgba(30, 41, 59, 0.5)',
+                              borderRadius: '6px',
+                              cursor: 'not-allowed',
+                              opacity: 0.8
+                            }}
+                            disabled
+                            title="Booking is only available when the bus is Active"
+                          >
+                            {bus.status === 'Delayed' ? 'Delayed (Locked)' : bus.status === 'In-Transit' ? 'In-Transit (Locked)' : 'Out of Service'}
+                          </button>
+                        )}
                         <button className="btn-action-outline">Track Route</button>
                       </div>
                     </div>
@@ -342,7 +362,7 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
                   </text>
                   <rect x="180" y="190" width="140" height="20" rx="10" fill="#1e293b" stroke="#3a4750" strokeWidth="1" />
                   <text x="250" y="204" textAnchor="middle" fill="#94a3b8" fontSize="9" fontWeight="bold">
-                    2.0 km • 15-20 min ETA
+                    4.0 km • 15-20 min ETA
                   </text>
 
                   {/* Stop 1: Kandoli */}
