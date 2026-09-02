@@ -121,7 +121,7 @@ export default function ColorBends({
   parallax = 1,
   noise = 0,
   iterations = 1,
-  intensity = 0,
+  intensity = 1.5,
   bandWidth = 6
 }) {
   const containerRef = useRef(null);

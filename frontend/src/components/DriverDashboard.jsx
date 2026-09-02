@@ -5,12 +5,13 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onLogout }) 
   const driverBus = buses.find(b => b.driver.toLowerCase() === user.username.toLowerCase()) || buses[0];
 
   const [seats, setSeats] = useState(driverBus.seatsAvailable);
+  const [maxSeats, setMaxSeats] = useState(driverBus.totalCapacity);
   const [status, setStatus] = useState(driverBus.status);
   const [nextStop, setNextStop] = useState(driverBus.nextStop);
   const [eta, setEta] = useState(driverBus.eta);
 
   const handleIncrement = () => {
-    if (seats < driverBus.totalCapacity) {
+    if (seats < maxSeats) {
       const newSeats = seats + 1;
       setSeats(newSeats);
       onUpdateBus(driverBus.id, { seatsAvailable: newSeats });
@@ -76,6 +77,24 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onLogout }) 
             <div className="driver-form">
               {/* Seat Control */}
               <div className="form-group seats-counter-group">
+                <label>Max Seats (Total Capacity)</label>
+                <input
+                  type="number"
+                  value={maxSeats}
+                  onChange={(e) => {
+                    const newMax = parseInt(e.target.value, 10) || 0;
+                    setMaxSeats(newMax);
+                    onUpdateBus(driverBus.id, { totalCapacity: newMax });
+                    if (seats > newMax) {
+                      setSeats(newMax);
+                      onUpdateBus(driverBus.id, { seatsAvailable: newMax, totalCapacity: newMax });
+                    }
+                  }}
+                  min="1"
+                  className="form-control"
+                  style={{ marginBottom: '16px' }}
+                />
+                
                 <label>Empty Seats Available</label>
                 <div className="counter-controls">
                   <button
@@ -91,7 +110,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onLogout }) 
                     type="button"
                     className="counter-btn"
                     onClick={handleIncrement}
-                    disabled={seats >= driverBus.totalCapacity || status === 'Out of Service'}
+                    disabled={seats >= maxSeats || status === 'Out of Service'}
                   >
                     +
                   </button>
@@ -99,24 +118,24 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onLogout }) 
                     type="button"
                     style={{ marginLeft: '12px', padding: '6px 12px', background: 'transparent', border: '1px solid #ef4444', color: '#ef4444', fontSize: '12px', borderRadius: '6px', cursor: 'pointer' }}
                     onClick={() => {
-                      setSeats(0);
-                      onUpdateBus(driverBus.id, { seatsAvailable: 0 });
+                      setSeats(maxSeats);
+                      onUpdateBus(driverBus.id, { seatsAvailable: maxSeats });
                     }}
                     disabled={status === 'Out of Service'}
                   >
-                    Reset to 0
+                    Reset
                   </button>
                 </div>
                 <div className="progress-bar-container driver-progress">
                   <div
                     className="progress-bar-fill"
                     style={{
-                      width: `${((driverBus.totalCapacity - seats) / driverBus.totalCapacity) * 100}%`,
+                      width: `${((maxSeats - seats) / maxSeats) * 100}%`,
                       backgroundColor: seats <= 5 ? '#ef4444' : seats <= 12 ? '#f59e0b' : '#10b981'
                     }}
                   ></div>
                 </div>
-                <p className="input-hint">Capacity: {driverBus.totalCapacity} total seats</p>
+                <p className="input-hint">Capacity: {maxSeats} total seats</p>
               </div>
 
               {/* Status Dropdown */}

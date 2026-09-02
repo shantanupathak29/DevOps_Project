@@ -166,7 +166,19 @@ export default function StudentDashboard({ user, buses, onLogout }) {
                         {bus.status === 'Active' && (
                           <button 
                             className="btn-action-primary" 
-                            style={{ marginRight: '8px', padding: '6px 12px', background: '#2185d5', border: 'none', color: '#fff', fontSize: '12px', fontWeight: '600', borderRadius: '6px', cursor: 'pointer' }}
+                            style={{ 
+                              marginRight: '8px', 
+                              padding: '6px 12px', 
+                              background: bus.seatsAvailable === 0 ? '#9ca3af' : '#2185d5', 
+                              border: 'none', 
+                              color: '#fff', 
+                              fontSize: '12px', 
+                              fontWeight: '600', 
+                              borderRadius: '6px', 
+                              cursor: bus.seatsAvailable === 0 ? 'not-allowed' : 'pointer',
+                              opacity: bus.seatsAvailable === 0 ? 0.7 : 1
+                            }}
+                            disabled={bus.seatsAvailable === 0}
                             onClick={(e) => {
                               e.stopPropagation();
                               const sapId = window.prompt(`Enter your SAP ID to book a ride on ${bus.busNo}:`);
@@ -175,7 +187,7 @@ export default function StudentDashboard({ user, buses, onLogout }) {
                               }
                             }}
                           >
-                            Book Ride
+                            {bus.seatsAvailable === 0 ? 'Locked (Full)' : 'Book Ride'}
                           </button>
                         )}
                         <button className="btn-action-outline">Track Route</button>
