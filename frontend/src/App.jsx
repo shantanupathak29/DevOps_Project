@@ -179,6 +179,7 @@ function App() {
             user={user}
             buses={buses}
             onLogout={handleLogout}
+            onUpdateBus={handleUpdateBus}
           />
         )}
       </main>

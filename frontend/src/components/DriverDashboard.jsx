@@ -1,14 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Silk from './Silk';
 
 export default function DriverDashboard({ user, buses, onUpdateBus, onLogout }) {
-  const driverBus = buses.find(b => b.driver.toLowerCase() === user.username.toLowerCase()) || buses[0];
+  const defaultBus = buses.find(b => b.driver.toLowerCase() === user.username.toLowerCase()) || buses[0];
+  const [selectedBusId, setSelectedBusId] = useState(defaultBus.id);
+  const driverBus = buses.find(b => b.id === selectedBusId) || defaultBus;
 
   const [seats, setSeats] = useState(driverBus.seatsAvailable);
   const [maxSeats, setMaxSeats] = useState(driverBus.totalCapacity);
   const [status, setStatus] = useState(driverBus.status);
   const [nextStop, setNextStop] = useState(driverBus.nextStop);
   const [eta, setEta] = useState(driverBus.eta);
+
+  useEffect(() => {
+    setSeats(driverBus.seatsAvailable);
+    setMaxSeats(driverBus.totalCapacity);
+    setStatus(driverBus.status);
+    setNextStop(driverBus.nextStop);
+    setEta(driverBus.eta);
+  }, [driverBus]);
 
   const handleIncrement = () => {
     if (seats < maxSeats) {
@@ -71,6 +81,18 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onLogout }) 
           {/* Control Card */}
           <div className="control-card">
             <h2>Update Bus Status</h2>
+            <div className="form-group" style={{ marginBottom: '15px' }}>
+              <label>Select Bus to Manage</label>
+              <select 
+                value={selectedBusId} 
+                onChange={(e) => setSelectedBusId(parseInt(e.target.value, 10))}
+                className="form-control"
+              >
+                {buses.map(b => (
+                  <option key={b.id} value={b.id}>{b.busNo} - {b.route}</option>
+                ))}
+              </select>
+            </div>
             <p className="card-subtitle">Manage details for assigned bus: <strong>{driverBus.busNo}</strong></p>
             <p className="route-detail">Route: {driverBus.route}</p>
 

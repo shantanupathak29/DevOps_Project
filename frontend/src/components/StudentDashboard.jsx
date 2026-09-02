@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Silk from './Silk';
 
-export default function StudentDashboard({ user, buses, onLogout }) {
+export default function StudentDashboard({ user, buses, onLogout, onUpdateBus }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [selectedBus, setSelectedBus] = useState(null);
@@ -183,6 +183,7 @@ export default function StudentDashboard({ user, buses, onLogout }) {
                               e.stopPropagation();
                               const sapId = window.prompt(`Enter your SAP ID to book a ride on ${bus.busNo}:`);
                               if (sapId) {
+                                onUpdateBus(bus.id, { seatsAvailable: Math.max(0, bus.seatsAvailable - 1) });
                                 alert(`Ride booked successfully for SAP ID: ${sapId} on ${bus.busNo}`);
                               }
                             }}
