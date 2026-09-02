@@ -5,6 +5,13 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [selectedBus, setSelectedBus] = useState(null);
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    mode: 'input',
+    bus: null,
+    sapId: '500109999',
+    message: ''
+  });
 
   const filteredBuses = buses.filter((bus) => {
     const matchesSearch =
@@ -181,25 +188,13 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
                             disabled={bus.seatsAvailable === 0}
                             onClick={(e) => {
                               e.stopPropagation();
-                              const sapId = window.prompt(`Enter your SAP ID to board ${bus.busNo} (${bus.route}):`, '500109999');
-                              if (sapId) {
-                                const fromStop = bus.route.includes('Kandoli → Bidholi') ? 'Kandoli' : 'Bidholi';
-                                const toStop = bus.route.includes('Kandoli → Bidholi') ? 'Bidholi' : 'Kandoli';
-                                if (onBoardStudent) {
-                                  const success = onBoardStudent(bus.id, {
-                                    name: user ? user.username : 'Student',
-                                    sapId: sapId.trim(),
-                                    from: fromStop,
-                                    to: toStop
-                                  });
-                                  if (success) {
-                                    alert(`Ride booked & boarded successfully! SAP ID: ${sapId} on ${bus.busNo} (${fromStop} ➔ ${toStop})`);
-                                  }
-                                } else {
-                                  onUpdateBus(bus.id, { seatsAvailable: Math.max(0, bus.seatsAvailable - 1) });
-                                  alert(`Ride booked & boarded successfully! SAP ID: ${sapId} on ${bus.busNo} (${fromStop} ➔ ${toStop})`);
-                                }
-                              }
+                              setModalState({
+                                isOpen: true,
+                                mode: 'input',
+                                bus: bus,
+                                sapId: '500109999',
+                                message: ''
+                              });
                             }}
                           >
                             {bus.seatsAvailable === 0 ? 'Full' : 'Book / Board'}
@@ -371,6 +366,92 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
           </div>
         </div>
       </div>
+      {/* Booking Modal */}
+      {modalState.isOpen && (
+        <div className="modal-backdrop" onClick={() => setModalState(prev => ({ ...prev, isOpen: false }))}>
+          <div className="modal-container" onClick={e => e.stopPropagation()} style={{ textAlign: 'center' }}>
+            {modalState.mode === 'input' && (
+              <>
+                <div className="modal-header" style={{ justifyContent: 'center', borderBottom: 'none' }}>
+                  <div className="modal-title-box">
+                    <span className="modal-icon">🚌</span>
+                    <h3>Book Ride on {modalState.bus?.busNo}</h3>
+                  </div>
+                </div>
+                <div style={{ marginBottom: '20px' }}>
+                  <p style={{ color: '#cbd5e1', fontSize: '14px', marginBottom: '16px' }}>
+                    Enter your SAP ID to board this bus.
+                  </p>
+                  <input
+                    type="text"
+                    value={modalState.sapId}
+                    onChange={(e) => setModalState(prev => ({ ...prev, sapId: e.target.value }))}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      background: 'rgba(15, 23, 42, 0.7)',
+                      border: '1px solid #475569',
+                      borderRadius: '10px',
+                      color: '#f3f3f3',
+                      fontSize: '16px',
+                      textAlign: 'center',
+                      outline: 'none',
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#38bdf8'}
+                    onBlur={(e) => e.target.style.borderColor = '#475569'}
+                  />
+                </div>
+                <div className="modal-actions" style={{ justifyContent: 'center' }}>
+                  <button className="btn-action-outline" onClick={() => setModalState(prev => ({ ...prev, isOpen: false }))}>Cancel</button>
+                  <button className="btn-action-primary" onClick={() => {
+                    const sapId = modalState.sapId.trim();
+                    if (!sapId) return;
+                    
+                    const fromStop = modalState.bus.route.includes('Kandoli → Bidholi') ? 'Kandoli' : 'Bidholi';
+                    const toStop = modalState.bus.route.includes('Kandoli → Bidholi') ? 'Bidholi' : 'Kandoli';
+                    
+                    if (onBoardStudent) {
+                      const res = onBoardStudent(modalState.bus.id, {
+                        name: user ? user.username : 'Student',
+                        sapId: sapId,
+                        from: fromStop,
+                        to: toStop
+                      });
+                      
+                      if (res && res.success) {
+                        setModalState(prev => ({ ...prev, mode: 'success', message: `Ride booked successfully! SAP ID: ${sapId} on ${modalState.bus.busNo}` }));
+                      } else {
+                        setModalState(prev => ({ ...prev, mode: 'error', message: res?.message || 'Failed to book ride.' }));
+                      }
+                    } else {
+                      onUpdateBus(modalState.bus.id, { seatsAvailable: Math.max(0, modalState.bus.seatsAvailable - 1) });
+                      setModalState(prev => ({ ...prev, mode: 'success', message: `Ride booked successfully! SAP ID: ${sapId} on ${modalState.bus.busNo}` }));
+                    }
+                  }}>Confirm Booking</button>
+                </div>
+              </>
+            )}
+            
+            {modalState.mode === 'success' && (
+              <>
+                <div style={{ fontSize: '48px', marginBottom: '16px' }}>✅</div>
+                <h3 style={{ color: '#6ee7b7', fontSize: '20px', marginBottom: '12px' }}>Booking Confirmed!</h3>
+                <p style={{ color: '#cbd5e1', fontSize: '15px', marginBottom: '24px' }}>{modalState.message}</p>
+                <button className="btn-action-primary" onClick={() => setModalState(prev => ({ ...prev, isOpen: false }))}>Awesome!</button>
+              </>
+            )}
+
+            {modalState.mode === 'error' && (
+              <>
+                <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
+                <h3 style={{ color: '#fca5a5', fontSize: '20px', marginBottom: '12px' }}>Booking Failed</h3>
+                <p style={{ color: '#cbd5e1', fontSize: '15px', marginBottom: '24px' }}>{modalState.message}</p>
+                <button className="btn-action-outline" onClick={() => setModalState(prev => ({ ...prev, isOpen: false }))}>Close</button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

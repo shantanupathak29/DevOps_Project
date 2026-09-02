@@ -264,8 +264,7 @@ function App() {
     });
 
     if (alreadyBoardedOnBus) {
-      alert(`Student with SAP ID ${sapIdToCheck} is already boarded on bus ${alreadyBoardedOnBus}. Please deboard first.`);
-      return false; // Indicates failure
+      return { success: false, message: `Student with SAP ID ${sapIdToCheck} is already boarded on bus ${alreadyBoardedOnBus}. Please deboard first.` };
     }
 
     setBuses((prevBuses) =>
@@ -295,7 +294,7 @@ function App() {
       })
     );
     
-    return true; // Indicates success
+    return { success: true };
   };
 
   const handleDeboardStudent = (busId, studentId) => {
