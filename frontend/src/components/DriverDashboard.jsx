@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Silk from './Silk';
 
-export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStudent, onDeboardStudent, onLogout }) {
+export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStudent, onDeboardStudent, onDeboardAllStudents, onLogout }) {
   const defaultBus = buses.find(b => b.driver.toLowerCase() === user.username.toLowerCase()) || buses[0];
   const [selectedBusId, setSelectedBusId] = useState(defaultBus ? defaultBus.id : 1);
   const driverBus = buses.find(b => b.id === selectedBusId) || buses[0] || defaultBus;
@@ -87,7 +87,6 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
       });
       
       if (!success) {
-        // Validation failed (e.g. duplicate SAP ID), don't close modal or reset form
         return;
       }
     }
@@ -102,6 +101,15 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
     if (window.confirm(`Mark ${studentName} as reached destination / deboarded from ${driverBus.busNo}?`)) {
       if (onDeboardStudent) {
         onDeboardStudent(driverBus.id, studentId);
+      }
+    }
+  };
+
+  const handleDeboardAll = () => {
+    if (boardedList.length === 0) return;
+    if (window.confirm(`Are you sure you want to deboard ALL ${boardedList.length} students from ${driverBus.busNo}? This will set seats free to total capacity (${driverBus.totalCapacity}).`)) {
+      if (onDeboardAllStudents) {
+        onDeboardAllStudents(driverBus.id);
       }
     }
   };
@@ -132,7 +140,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
         {/* Top Summary Stats */}
         <section className="stats-grid">
           <div className="stat-card">
-            <div className="stat-icon-box" style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8' }}>
+            <div className="stat-icon-box" style={{ background: 'transparent', color: '#38bdf8' }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
             <div className="stat-content">
@@ -142,7 +150,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
           </div>
 
           <div className="stat-card">
-            <div className="stat-icon-box" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
+            <div className="stat-icon-box" style={{ background: 'transparent', color: '#10b981' }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 4v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
             </div>
             <div className="stat-content">
@@ -152,7 +160,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
           </div>
 
           <div className="stat-card">
-            <div className="stat-icon-box" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b' }}>
+            <div className="stat-icon-box" style={{ background: 'transparent', color: '#f59e0b' }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
             <div className="stat-content">
@@ -190,18 +198,38 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
             </select>
           </div>
 
-          <div className="selector-right">
+          <div className="selector-right" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
             <span className={`status-badge status-${driverBus.status.toLowerCase().replace(' ', '-')}`}>
               Trip Status: {driverBus.status}
             </span>
+            {boardedList.length > 0 && (
+              <button
+                type="button"
+                className="btn"
+                style={{
+                  background: 'rgba(239, 68, 68, 0.15)',
+                  border: '1px solid #ef4444',
+                  color: '#f87171',
+                  padding: '8px 14px',
+                  fontSize: '13px',
+                  borderRadius: '10px',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  transition: 'all 0.2s ease'
+                }}
+                onClick={handleDeboardAll}
+                title="Deboard all students currently on this bus"
+              >
+                🛑 Deboard All ({boardedList.length})
+              </button>
+            )}
             <button
               type="button"
               className="btn btn-student btn-sm-board"
               onClick={() => setShowBoardModal(true)}
               disabled={driverBus.seatsAvailable <= 0 || driverBus.status === 'Out of Service'}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              <span>+ Board Student</span>
+              <span>Board Student</span>
             </button>
           </div>
         </div>

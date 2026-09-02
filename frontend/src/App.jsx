@@ -315,6 +315,21 @@ function App() {
     );
   };
 
+  const handleDeboardAllStudents = (busId) => {
+    setBuses((prevBuses) =>
+      prevBuses.map((bus) => {
+        if (bus.id === busId) {
+          return {
+            ...bus,
+            boardedStudents: [],
+            seatsAvailable: bus.totalCapacity
+          };
+        }
+        return bus;
+      })
+    );
+  };
+
   const _navigateTo404 = () => {
     setCurrentView('404');
     window.history.pushState(null, '', '/404');
@@ -339,6 +354,7 @@ function App() {
             onUpdateBus={handleUpdateBus}
             onBoardStudent={handleBoardStudent}
             onDeboardStudent={handleDeboardStudent}
+            onDeboardAllStudents={handleDeboardAllStudents}
             onLogout={handleLogout}
           />
         ) : (
