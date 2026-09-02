@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Silk from './Silk';
 
-export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, onBoardStudent }) {
+export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, onBoardStudent, onDeboardStudent }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [selectedBus, setSelectedBus] = useState(null);
@@ -12,6 +12,15 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
     sapId: '500109999',
     message: ''
   });
+
+  // Find if current student is currently boarded on any bus
+  const currentBoardedBus = buses.find(b =>
+    b.boardedStudents?.some(s => s.sapId === modalState.sapId || s.name === user?.username)
+  );
+
+  const isBoardedOnThisBus = (bus) => {
+    return bus.boardedStudents?.some(s => s.sapId === modalState.sapId || s.name === user?.username);
+  };
 
   const filteredBuses = buses.filter((bus) => {
     const matchesSearch =
@@ -43,9 +52,47 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
           </div>
           <div className="user-profile">
             <span className="username">Hello, {user.username}</span>
+            {currentBoardedBus && (
+              <button 
+                className="btn-action-outline" 
+                style={{ padding: '6px 12px', fontSize: '12px', borderColor: '#ef4444', color: '#fca5a5', marginRight: '8px', cursor: 'pointer' }}
+                onClick={() => setModalState({ isOpen: true, mode: 'deboard', bus: currentBoardedBus, sapId: modalState.sapId, message: '' })}
+              >
+                🛑 Deboard ({currentBoardedBus.busNo})
+              </button>
+            )}
             <button className="btn-logout" onClick={onLogout}>Logout</button>
           </div>
         </header>
+
+        {/* Active Booking Banner (Only shown if student has booked a seat) */}
+        {currentBoardedBus && (
+          <div style={{
+            background: 'rgba(239, 68, 68, 0.15)',
+            border: '1px solid #ef4444',
+            borderRadius: '12px',
+            padding: '12px 20px',
+            marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justify: 'space-between',
+            color: '#f87171'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '20px' }}>🚌</span>
+              <div>
+                <strong>Active Boarded Ride:</strong> You are currently booked on <strong>{currentBoardedBus.busNo}</strong> ({currentBoardedBus.route}).
+              </div>
+            </div>
+            <button
+              className="btn-action-primary"
+              style={{ background: '#ef4444', border: 'none', padding: '6px 14px', fontSize: '13px', cursor: 'pointer' }}
+              onClick={() => setModalState({ isOpen: true, mode: 'deboard', bus: currentBoardedBus, sapId: modalState.sapId, message: '' })}
+            >
+              Deboard Now
+            </button>
+          </div>
+        )}
 
         {/* Stats */}
         <section className="stats-grid">
@@ -116,11 +163,13 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
                   if (bus.seatsAvailable <= 5) progressColor = '#ef4444';
                   else if (bus.seatsAvailable <= 12) progressColor = '#f59e0b';
                   const isSelected = selectedBus && selectedBus.id === bus.id;
+                  const isBoarded = isBoardedOnThisBus(bus);
 
                   return (
                     <div
                       key={bus.id}
                       className={`bus-card ${isSelected ? 'selected' : ''}`}
+                      style={isBoarded ? { border: '2px solid #ef4444', background: 'rgba(239, 68, 68, 0.05)' } : {}}
                       onClick={() => setSelectedBus(bus)}
                     >
                       <div className="bus-card-header">
@@ -129,7 +178,7 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 4v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
                           </div>
                           <div>
-                            <h4>{bus.busNo}</h4>
+                            <h4>{bus.busNo} {isBoarded && <span style={{ color: '#f87171', fontSize: '12px', fontWeight: 'bold' }}>(Your Ride)</span>}</h4>
                             <p className="bus-route-text">{bus.route} ({bus.departureTime})</p>
                           </div>
                         </div>
@@ -170,36 +219,63 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
                       </div>
 
                       <div className="card-actions">
-                        {bus.status !== 'Out of Service' && (
+                        {isBoarded ? (
+                          <button
+                            className="btn-action-outline"
+                            style={{
+                              marginRight: '6px',
+                              padding: '6px 14px',
+                              fontSize: '12px',
+                              fontWeight: '600',
+                              borderColor: '#ef4444',
+                              color: '#ffffff',
+                              background: '#ef4444',
+                              borderRadius: '6px',
+                              cursor: 'pointer'
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setModalState({
+                                isOpen: true,
+                                mode: 'deboard',
+                                bus: bus,
+                                sapId: modalState.sapId,
+                                message: ''
+                              });
+                            }}
+                          >
+                            🛑 Deboard Ride
+                          </button>
+                        ) : bus.status !== 'Out of Service' ? (
                           <button 
                             className="btn-action-primary" 
                             style={{ 
-                              marginRight: '8px', 
+                              marginRight: '6px', 
                               padding: '6px 12px', 
-                              background: bus.seatsAvailable === 0 ? '#9ca3af' : '#2185d5', 
+                              background: (bus.seatsAvailable === 0 || currentBoardedBus) ? '#64748b' : '#2185d5', 
                               border: 'none', 
                               color: '#fff', 
                               fontSize: '12px', 
                               fontWeight: '600', 
                               borderRadius: '6px', 
-                              cursor: bus.seatsAvailable === 0 ? 'not-allowed' : 'pointer',
-                              opacity: bus.seatsAvailable === 0 ? 0.7 : 1
+                              cursor: (bus.seatsAvailable === 0 || currentBoardedBus) ? 'not-allowed' : 'pointer',
+                              opacity: (bus.seatsAvailable === 0 || currentBoardedBus) ? 0.7 : 1
                             }}
-                            disabled={bus.seatsAvailable === 0}
+                            disabled={bus.seatsAvailable === 0 || !!currentBoardedBus}
                             onClick={(e) => {
                               e.stopPropagation();
                               setModalState({
                                 isOpen: true,
                                 mode: 'input',
                                 bus: bus,
-                                sapId: '500109999',
+                                sapId: modalState.sapId,
                                 message: ''
                               });
                             }}
                           >
-                            {bus.seatsAvailable === 0 ? 'Full' : 'Book / Board'}
+                            {currentBoardedBus ? 'Ride Active' : bus.seatsAvailable === 0 ? 'Full' : 'Book / Board'}
                           </button>
-                        )}
+                        ) : null}
                         <button className="btn-action-outline">Track Route</button>
                       </div>
                     </div>
@@ -356,8 +432,8 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
                 <div className="map-legend">
                   <h4>Inspecting: {selectedBus.busNo} ({selectedBus.route})</h4>
                   <p>
-                    Status: <span className="bold" style={{ color: selectedBus.status === 'Delayed' ? '#f87171' : '#34d399' }}>{selectedBus.status}</span> |
-                    Departure: <span className="bold">{selectedBus.departureTime}</span> |
+                    Status: <span className="bold" style={{ color: selectedBus.status === 'Delayed' ? '#f87171' : '#34d399' }}>{selectedBus.status}</span> | 
+                    Departure: <span className="bold">{selectedBus.departureTime}</span> | 
                     Next Stop: <span className="bold">{selectedBus.nextStop} (ETA: {selectedBus.eta})</span>
                   </p>
                 </div>
@@ -366,7 +442,8 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
           </div>
         </div>
       </div>
-      {/* Booking Modal */}
+
+      {/* Booking / Deboard Modal */}
       {modalState.isOpen && (
         <div className="modal-backdrop" onClick={() => setModalState(prev => ({ ...prev, isOpen: false }))}>
           <div className="modal-container" onClick={e => e.stopPropagation()} style={{ textAlign: 'center' }}>
@@ -431,6 +508,84 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
                 </div>
               </>
             )}
+
+            {modalState.mode === 'deboard' && (
+              <>
+                <div className="modal-header" style={{ justifyContent: 'center', borderBottom: 'none' }}>
+                  <div className="modal-title-box">
+                    <span className="modal-icon">🛑</span>
+                    <h3>Deboard / Cancel Ride</h3>
+                  </div>
+                </div>
+                <div style={{ marginBottom: '20px' }}>
+                  <p style={{ color: '#cbd5e1', fontSize: '14px', marginBottom: '16px' }}>
+                    Enter your SAP ID to deboard from your booked bus and free up your seat.
+                  </p>
+                  <input
+                    type="text"
+                    value={modalState.sapId}
+                    onChange={(e) => setModalState(prev => ({ ...prev, sapId: e.target.value }))}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      background: 'rgba(15, 23, 42, 0.7)',
+                      border: '1px solid #ef4444',
+                      borderRadius: '10px',
+                      color: '#f3f3f3',
+                      fontSize: '16px',
+                      textAlign: 'center',
+                      outline: 'none',
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#ef4444'}
+                    onBlur={(e) => e.target.style.borderColor = '#475569'}
+                  />
+                </div>
+                <div className="modal-actions" style={{ justifyContent: 'center' }}>
+                  <button className="btn-action-outline" onClick={() => setModalState(prev => ({ ...prev, isOpen: false }))}>Cancel</button>
+                  <button 
+                    className="btn-action-primary" 
+                    style={{ background: '#ef4444' }}
+                    onClick={() => {
+                      const sapId = modalState.sapId.trim();
+                      if (!sapId) return;
+
+                      let targetBus = null;
+                      let targetPassenger = null;
+
+                      for (const b of buses) {
+                        const found = b.boardedStudents?.find(s => s.sapId === sapId);
+                        if (found) {
+                          targetBus = b;
+                          targetPassenger = found;
+                          break;
+                        }
+                      }
+
+                      if (targetBus && targetPassenger) {
+                        if (onDeboardStudent) {
+                          onDeboardStudent(targetBus.id, targetPassenger.id);
+                        } else {
+                          onUpdateBus(targetBus.id, { seatsAvailable: Math.min(targetBus.totalCapacity, targetBus.seatsAvailable + 1) });
+                        }
+                        setModalState(prev => ({
+                          ...prev,
+                          mode: 'deboard_success',
+                          message: `Deboarded successfully from ${targetBus.busNo} (${targetBus.route})! Your seat is released and you can now book another bus.`
+                        }));
+                      } else {
+                        setModalState(prev => ({
+                          ...prev,
+                          mode: 'error',
+                          message: `No active ride found for SAP ID: ${sapId}.`
+                        }));
+                      }
+                    }}
+                  >
+                    Confirm Deboard
+                  </button>
+                </div>
+              </>
+            )}
             
             {modalState.mode === 'success' && (
               <>
@@ -441,10 +596,19 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
               </>
             )}
 
+            {modalState.mode === 'deboard_success' && (
+              <>
+                <div style={{ fontSize: '48px', marginBottom: '16px' }}>🏁</div>
+                <h3 style={{ color: '#6ee7b7', fontSize: '20px', marginBottom: '12px' }}>Deboarded Successfully!</h3>
+                <p style={{ color: '#cbd5e1', fontSize: '15px', marginBottom: '24px' }}>{modalState.message}</p>
+                <button className="btn-action-primary" onClick={() => setModalState(prev => ({ ...prev, isOpen: false }))}>Book Another Bus</button>
+              </>
+            )}
+
             {modalState.mode === 'error' && (
               <>
                 <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
-                <h3 style={{ color: '#fca5a5', fontSize: '20px', marginBottom: '12px' }}>Booking Failed</h3>
+                <h3 style={{ color: '#fca5a5', fontSize: '20px', marginBottom: '12px' }}>Notification</h3>
                 <p style={{ color: '#cbd5e1', fontSize: '15px', marginBottom: '24px' }}>{modalState.message}</p>
                 <button className="btn-action-outline" onClick={() => setModalState(prev => ({ ...prev, isOpen: false }))}>Close</button>
               </>

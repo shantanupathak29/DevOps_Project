@@ -348,6 +348,7 @@ function App() {
             onLogout={handleLogout}
             onUpdateBus={handleUpdateBus}
             onBoardStudent={handleBoardStudent}
+            onDeboardStudent={handleDeboardStudent}
           />
         )}
       </main>
