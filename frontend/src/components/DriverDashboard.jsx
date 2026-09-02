@@ -20,6 +20,11 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
   const [newStudentTo, setNewStudentTo] = useState(
     driverBus.route.includes('Kandoli → Bidholi') ? 'Bidholi' : 'Kandoli'
   );
+  const [boardError, setBoardError] = useState('');
+
+  // Deboard confirmation modals state (In-UI modals)
+  const [deboardTarget, setDeboardTarget] = useState(null);
+  const [showDeboardAllModal, setShowDeboardAllModal] = useState(false);
 
   // Filtered list of currently boarded students
   const boardedList = driverBus.boardedStudents || [];
@@ -64,13 +69,14 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
 
   const handleManualBoardSubmit = (e) => {
     e.preventDefault();
+    setBoardError('');
     if (!newStudentName.trim() || !newStudentSap.trim()) {
-      alert('Please provide both Student Name and SAP ID.');
+      setBoardError('Please provide both Student Name and SAP ID.');
       return;
     }
 
     if (driverBus.seatsAvailable <= 0) {
-      alert('Cannot board student: Bus has reached full capacity.');
+      setBoardError('Cannot board student: Bus has reached full capacity.');
       return;
     }
 
@@ -78,7 +84,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
     const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     if (onBoardStudent) {
-      const success = onBoardStudent(driverBus.id, {
+      const res = onBoardStudent(driverBus.id, {
         name: newStudentName.trim(),
         sapId: newStudentSap.trim(),
         boardingTime: timeStr,
@@ -86,7 +92,8 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
         to: newStudentTo
       });
       
-      if (!success) {
+      if (res && !res.success) {
+        setBoardError(res.message || 'Cannot board student.');
         return;
       }
     }
@@ -94,24 +101,23 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
     // Reset Form
     setNewStudentName('');
     setNewStudentSap('');
+    setBoardError('');
     setShowBoardModal(false);
   };
 
-  const handleDeboard = (studentId, studentName) => {
-    if (window.confirm(`Mark ${studentName} as reached destination / deboarded from ${driverBus.busNo}?`)) {
-      if (onDeboardStudent) {
-        onDeboardStudent(driverBus.id, studentId);
-      }
+  const confirmDeboardStudent = () => {
+    if (!deboardTarget) return;
+    if (onDeboardStudent) {
+      onDeboardStudent(driverBus.id, deboardTarget.id);
     }
+    setDeboardTarget(null);
   };
 
-  const handleDeboardAll = () => {
-    if (boardedList.length === 0) return;
-    if (window.confirm(`Are you sure you want to deboard ALL ${boardedList.length} students from ${driverBus.busNo}? This will set seats free to total capacity (${driverBus.totalCapacity}).`)) {
-      if (onDeboardAllStudents) {
-        onDeboardAllStudents(driverBus.id);
-      }
+  const confirmDeboardAll = () => {
+    if (onDeboardAllStudents) {
+      onDeboardAllStudents(driverBus.id);
     }
+    setShowDeboardAllModal(false);
   };
 
   const occupancyRate = Math.round(
@@ -222,7 +228,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
                   fontWeight: 600,
                   transition: 'all 0.2s ease'
                 }}
-                onClick={handleDeboardAll}
+                onClick={() => setShowDeboardAllModal(true)}
                 title="Deboard all students currently on this bus"
               >
                 🛑 Deboard All ({boardedList.length})
@@ -231,7 +237,10 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
             <button
               type="button"
               className="btn btn-student btn-sm-board"
-              onClick={() => setShowBoardModal(true)}
+              onClick={() => {
+                setBoardError('');
+                setShowBoardModal(true);
+              }}
               disabled={driverBus.seatsAvailable <= 0 || driverBus.status === 'Out of Service'}
             >
               <span>Board Student</span>
@@ -368,7 +377,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
                             type="button"
                             className="btn-deboard"
                             title="Mark student as deboarded / dropped"
-                            onClick={() => handleDeboard(student.id, student.name)}
+                            onClick={() => setDeboardTarget(student)}
                           >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                             <span>Deboard</span>
@@ -558,6 +567,13 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
             </div>
 
             <form onSubmit={handleManualBoardSubmit} className="modal-form">
+              {boardError && (
+                <div className="modal-error-banner">
+                  <span>⚠️</span>
+                  <span>{boardError}</span>
+                </div>
+              )}
+
               <div className="form-group">
                 <label htmlFor="modal-student-name">Student Full Name *</label>
                 <input
@@ -565,7 +581,10 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
                   id="modal-student-name"
                   placeholder="e.g. Sahaj Parikh"
                   value={newStudentName}
-                  onChange={(e) => setNewStudentName(e.target.value)}
+                  onChange={(e) => {
+                    setNewStudentName(e.target.value);
+                    if (boardError) setBoardError('');
+                  }}
                   required
                   autoFocus
                 />
@@ -578,7 +597,10 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
                   id="modal-student-sap"
                   placeholder="e.g. 500108920"
                   value={newStudentSap}
-                  onChange={(e) => setNewStudentSap(e.target.value)}
+                  onChange={(e) => {
+                    setNewStudentSap(e.target.value);
+                    if (boardError) setBoardError('');
+                  }}
                   required
                 />
               </div>
@@ -630,6 +652,129 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ===================================================================
+          MODAL: DEBOARD INDIVIDUAL STUDENT (IN-UI POPUP)
+          =================================================================== */}
+      {deboardTarget && (
+        <div className="modal-backdrop" onClick={() => setDeboardTarget(null)}>
+          <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="modal-title-box">
+                <span className="modal-icon">🛑</span>
+                <h3>Confirm Student Deboard</h3>
+              </div>
+              <button
+                type="button"
+                className="modal-close-btn"
+                onClick={() => setDeboardTarget(null)}
+              >
+                &times;
+              </button>
+            </div>
+
+            <div style={{ textAlign: 'center', margin: '14px 0 22px' }}>
+              <p style={{ color: '#cbd5e1', fontSize: '15px', lineHeight: '1.6', margin: '0 0 16px' }}>
+                Are you sure you want to deboard <strong>{deboardTarget.name}</strong> from <strong>{driverBus.busNo}</strong>?
+              </p>
+
+              <div className="modal-info-bar" style={{ flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
+                <div>👤 <strong>Passenger:</strong> {deboardTarget.name}</div>
+                <div>🪪 <strong>SAP ID:</strong> {deboardTarget.sapId}</div>
+                <div>📍 <strong>Trip:</strong> {deboardTarget.from} &rarr; {deboardTarget.to}</div>
+                <div>⏰ <strong>Boarded:</strong> {deboardTarget.boardingTime}</div>
+              </div>
+
+              <p style={{ color: '#38bdf8', fontSize: '13px', marginTop: '14px', marginBottom: 0 }}>
+                ℹ️ Deboarding frees up 1 seat immediately on {driverBus.busNo}.
+              </p>
+            </div>
+
+            <div className="modal-actions" style={{ justifyContent: 'center', gap: '14px' }}>
+              <button
+                type="button"
+                className="btn btn-secondary-custom"
+                onClick={() => setDeboardTarget(null)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-student"
+                style={{
+                  background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                  borderColor: '#ef4444',
+                  boxShadow: '0 4px 16px rgba(239, 68, 68, 0.4)'
+                }}
+                onClick={confirmDeboardStudent}
+              >
+                Confirm Deboard
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===================================================================
+          MODAL: DEBOARD ALL PASSENGERS (IN-UI POPUP)
+          =================================================================== */}
+      {showDeboardAllModal && (
+        <div className="modal-backdrop" onClick={() => setShowDeboardAllModal(false)}>
+          <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="modal-title-box">
+                <span className="modal-icon">⚠️</span>
+                <h3>Deboard All Passengers</h3>
+              </div>
+              <button
+                type="button"
+                className="modal-close-btn"
+                onClick={() => setShowDeboardAllModal(false)}
+              >
+                &times;
+              </button>
+            </div>
+
+            <div style={{ textAlign: 'center', margin: '14px 0 22px' }}>
+              <p style={{ color: '#cbd5e1', fontSize: '15px', lineHeight: '1.6', margin: '0 0 16px' }}>
+                Are you sure you want to deboard all <strong>{boardedList.length} passengers</strong> from <strong>{driverBus.busNo}</strong>?
+              </p>
+
+              <div className="modal-info-bar" style={{ flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
+                <div>🚌 <strong>Bus:</strong> {driverBus.busNo} ({driverBus.route})</div>
+                <div>👥 <strong>Passengers to Deboard:</strong> {boardedList.length}</div>
+                <div>💺 <strong>Seat Capacity Reset:</strong> {driverBus.totalCapacity} seats free</div>
+              </div>
+
+              <p style={{ color: '#fca5a5', fontSize: '13px', marginTop: '14px', marginBottom: 0 }}>
+                ⚠️ All passenger records will be cleared and available seats will reset to full capacity.
+              </p>
+            </div>
+
+            <div className="modal-actions" style={{ justifyContent: 'center', gap: '14px' }}>
+              <button
+                type="button"
+                className="btn btn-secondary-custom"
+                onClick={() => setShowDeboardAllModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-student"
+                style={{
+                  background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
+                  borderColor: '#ef4444',
+                  boxShadow: '0 4px 16px rgba(239, 68, 68, 0.4)'
+                }}
+                onClick={confirmDeboardAll}
+              >
+                Deboard All ({boardedList.length})
+              </button>
+            </div>
           </div>
         </div>
       )}

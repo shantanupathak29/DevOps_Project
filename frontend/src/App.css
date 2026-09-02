@@ -1414,6 +1414,7 @@ body {
   color: #f3f3f3;
   background: linear-gradient(135deg, #ffffff 0%, #38bdf8 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -1462,6 +1463,7 @@ body {
   margin: 0;
   background: linear-gradient(180deg, #ffffff 20%, #2185d5 70%, #0284c7 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: 0 0 40px rgba(33, 133, 213, 0.4);
   position: relative;
@@ -2488,13 +2490,13 @@ body {
   background: rgba(239, 68, 68, 0.15);
 }
 
-/* Modal Dialog */
+/* Modal Dialog (Styled like Footer Profile Popover) */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(10, 15, 25, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2505,21 +2507,22 @@ body {
 
 .modal-container {
   width: 100%;
-  max-width: 500px;
-  background: #1e293b;
-  border: 1px solid rgba(56, 189, 248, 0.3);
-  border-radius: 20px;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(33, 133, 213, 0.2);
-  padding: 28px;
+  max-width: 480px;
+  background: rgba(15, 23, 42, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 16px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.75), 0 0 30px rgba(56, 189, 248, 0.18);
+  padding: 26px;
   animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes slideUp {
   from {
-    transform: translateY(20px) scale(0.97);
+    transform: translateY(16px) scale(0.96);
     opacity: 0;
   }
-
   to {
     transform: translateY(0) scale(1);
     opacity: 1;
@@ -2530,9 +2533,9 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 22px;
+  margin-bottom: 20px;
   padding-bottom: 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.15);
 }
 
 .modal-title-box {
@@ -2548,7 +2551,7 @@ body {
 .modal-title-box h3 {
   font-size: 17px;
   font-weight: 800;
-  color: #f3f3f3;
+  color: #f8fafc;
   margin: 0;
 }
 
@@ -2563,13 +2566,48 @@ body {
 }
 
 .modal-close-btn:hover {
-  color: #f3f3f3;
+  color: #38bdf8;
 }
 
 .modal-form {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.modal-error-banner {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #fca5a5;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.modal-form input,
+.modal-form select {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 8px;
+  color: #f8fafc;
+  font-size: 14px;
+  font-weight: 500;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.modal-form input:focus,
+.modal-form select:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+  background: rgba(30, 41, 59, 0.9);
 }
 
 .modal-grid-2 {
@@ -2582,9 +2620,9 @@ body {
   display: flex;
   justify-content: space-between;
   padding: 10px 14px;
-  background: rgba(15, 23, 42, 0.6);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(30, 41, 59, 0.6);
+  border-radius: 10px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
   font-size: 12px;
   color: #cbd5e1;
 }
@@ -2623,9 +2661,9 @@ body {
   .modal-grid-2 {
     grid-template-columns: 1fr;
   }
+}
 
-
-  /* Global Top Navigation Header Styling */
+/* Global Top Navigation Header Styling */
   .main-app-header {
     position: sticky;
     top: 0;
@@ -2915,4 +2953,3 @@ body {
       display: none;
     }
   }
-}
