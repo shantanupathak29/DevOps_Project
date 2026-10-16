@@ -52,6 +52,28 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
     }
   };
 
+  const handleResetAllSeatsAndDeboard = () => {
+    if (onDeboardAllStudents) {
+      onDeboardAllStudents(driverBus.id);
+    } else {
+      onUpdateBus(driverBus.id, {
+        seatsAvailable: driverBus.totalCapacity,
+        boardedStudents: []
+      });
+    }
+  };
+
+  const handleCapacityChange = (newCapacity) => {
+    const minCap = Math.max(1, boardedList.length);
+    const safeCapacity = Math.max(minCap, Math.min(100, newCapacity));
+    const occupied = boardedList.length;
+    const newAvailable = Math.max(0, safeCapacity - occupied);
+    onUpdateBus(driverBus.id, {
+      totalCapacity: safeCapacity,
+      seatsAvailable: newAvailable
+    });
+  };
+
   const handleStatusChange = (e) => {
     onUpdateBus(driverBus.id, { status: e.target.value });
   };
@@ -149,10 +171,10 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
         </div>
       </div>
 
-        {/* Top Summary Stats */}
+        {/* Top Summary Stats - Horizontal Alignment */}
         <section className="stats-grid">
           <div className="stat-card">
-            <div className="stat-icon-box" style={{ background: 'transparent', color: '#2e7d7a' }}>
+            <div className="stat-icon-box">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
             <div className="stat-content">
@@ -162,7 +184,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
           </div>
 
           <div className="stat-card">
-            <div className="stat-icon-box" style={{ background: 'transparent', color: '#2e7d7a' }}>
+            <div className="stat-icon-box">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 4v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
             </div>
             <div className="stat-content">
@@ -172,13 +194,13 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
           </div>
 
           <div className="stat-card">
-            <div className="stat-icon-box" style={{ background: 'transparent', color: 'var(--primary)' }}>
+            <div className="stat-icon-box">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
             <div className="stat-content">
               <h3>Next Stop &amp; ETA</h3>
-              <p className="stat-number" style={{ fontSize: '18px', paddingTop: '4px' }}>
-                {driverBus.nextStop} <span style={{ fontSize: '13px', color: '#2e7d7a' }}>({driverBus.eta})</span>
+              <p className="stat-number">
+                {driverBus.nextStop} <span className="stat-eta-badge">{driverBus.eta}</span>
               </p>
             </div>
           </div>
@@ -200,7 +222,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
                   setNewStudentTo(b.route.includes('Kandoli → Bidholi') ? 'Bidholi' : 'Kandoli');
                 }
               }}
-              className="form-control bus-select-dropdown"
+              className="form-control bus-select-dropdown form-select-enhanced"
             >
               {buses.map(b => (
                 <option key={b.id} value={b.id}>
@@ -217,18 +239,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
             {boardedList.length > 0 && (
               <button
                 type="button"
-                className="btn"
-                style={{
-                  background: 'rgba(239, 68, 68, 0.15)',
-                  border: '1px solid #ef4444',
-                  color: '#f87171',
-                  padding: '8px 14px',
-                  fontSize: '13px',
-                  borderRadius: '10px',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                  transition: 'all 0.2s ease'
-                }}
+                className="btn-deboard-all-top"
                 onClick={() => setShowDeboardAllModal(true)}
                 title="Deboard all students currently on this bus"
               >
@@ -412,6 +423,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
                     className="counter-btn"
                     onClick={handleDecrementSeats}
                     disabled={driverBus.seatsAvailable <= 0 || driverBus.status === 'Out of Service'}
+                    title="Decrease available seats"
                   >
                     -
                   </button>
@@ -421,14 +433,16 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
                     className="counter-btn"
                     onClick={handleIncrementSeats}
                     disabled={driverBus.seatsAvailable >= driverBus.totalCapacity || driverBus.status === 'Out of Service'}
+                    title="Increase available seats"
                   >
                     +
                   </button>
                   <button
                     type="button"
                     className="btn-reset-seats"
-                    onClick={() => onUpdateBus(driverBus.id, { seatsAvailable: driverBus.totalCapacity })}
+                    onClick={handleResetAllSeatsAndDeboard}
                     disabled={driverBus.status === 'Out of Service'}
+                    title="Deboard all passengers and reset all seats to full capacity"
                   >
                     Reset All Free
                   </button>
@@ -448,10 +462,61 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
                 </p>
               </div>
 
+              {/* Total Bus Capacity Configuration */}
+              <div className="form-group capacity-config-group">
+                <label htmlFor="bus-capacity-input">Total Bus Capacity</label>
+                <div className="capacity-stepper-box">
+                  <button
+                    type="button"
+                    className="counter-btn-sm"
+                    onClick={() => handleCapacityChange(driverBus.totalCapacity - 1)}
+                    disabled={driverBus.totalCapacity <= Math.max(1, boardedList.length) || driverBus.status === 'Out of Service'}
+                    title="Decrease total capacity"
+                  >
+                    &minus;
+                  </button>
+                  <input
+                    type="number"
+                    id="bus-capacity-input"
+                    min={Math.max(1, boardedList.length)}
+                    max="100"
+                    value={driverBus.totalCapacity}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value, 10);
+                      if (!isNaN(val) && val >= 1) {
+                        handleCapacityChange(val);
+                      }
+                    }}
+                    className="capacity-input-field"
+                    disabled={driverBus.status === 'Out of Service'}
+                  />
+                  <button
+                    type="button"
+                    className="counter-btn-sm"
+                    onClick={() => handleCapacityChange(driverBus.totalCapacity + 1)}
+                    disabled={driverBus.totalCapacity >= 100 || driverBus.status === 'Out of Service'}
+                    title="Increase total capacity"
+                  >
+                    +
+                  </button>
+                  <span className="capacity-unit-pill">
+                    {driverBus.totalCapacity} Total Seats
+                  </span>
+                </div>
+                <p className="input-hint">
+                  Configure maximum vehicle capacity ({boardedList.length} onboard currently).
+                </p>
+              </div>
+
               {/* Status Dropdown */}
               <div className="form-group">
                 <label htmlFor="bus-status-select">Trip Status</label>
-                <select id="bus-status-select" value={driverBus.status} onChange={handleStatusChange}>
+                <select
+                  id="bus-status-select"
+                  value={driverBus.status}
+                  onChange={handleStatusChange}
+                  className="form-select-enhanced"
+                >
                   <option value="Active">Active</option>
                   <option value="In-Transit">In-Transit</option>
                   <option value="Delayed">Delayed</option>
@@ -467,6 +532,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
                   value={driverBus.nextStop}
                   onChange={handleStopChange}
                   disabled={driverBus.status === 'Out of Service'}
+                  className="form-select-enhanced"
                 >
                   <option value="Kandoli">Kandoli</option>
                   <option value="Bidholi">Bidholi</option>
@@ -483,6 +549,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
                   onChange={handleEtaChange}
                   placeholder="e.g. 15 mins"
                   disabled={driverBus.status === 'Out of Service'}
+                  className="form-input-enhanced"
                 />
               </div>
             </div>
@@ -664,51 +731,62 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
           <div className="modal-container" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div className="modal-title-box">
-                <span className="modal-icon">🛑</span>
-                <h3>Confirm Student Deboard</h3>
+                <span className="modal-icon-badge modal-icon-rose">🛑</span>
+                <div className="modal-title-text-group">
+                  <h3>Confirm Student Deboard</h3>
+                  <p className="modal-subtitle">Mark passenger as dropped off</p>
+                </div>
               </div>
               <button
                 type="button"
                 className="modal-close-btn"
                 onClick={() => setDeboardTarget(null)}
+                aria-label="Close dialog"
               >
                 &times;
               </button>
             </div>
 
-            <div style={{ textAlign: 'center', margin: '14px 0 22px' }}>
-              <p style={{ color: '#cbd5e1', fontSize: '15px', lineHeight: '1.6', margin: '0 0 16px' }}>
+            <div className="modal-body-content">
+              <p className="modal-confirm-desc">
                 Are you sure you want to deboard <strong>{deboardTarget.name}</strong> from <strong>{driverBus.busNo}</strong>?
               </p>
 
-              <div className="modal-info-bar" style={{ flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
-                <div>👤 <strong>Passenger:</strong> {deboardTarget.name}</div>
-                <div>🪪 <strong>SAP ID:</strong> {deboardTarget.sapId}</div>
-                <div>📍 <strong>Trip:</strong> {deboardTarget.from} &rarr; {deboardTarget.to}</div>
-                <div>⏰ <strong>Boarded:</strong> {deboardTarget.boardingTime}</div>
+              <div className="modal-manifest-summary">
+                <div className="manifest-item">
+                  <span className="manifest-label">👤 Passenger</span>
+                  <span className="manifest-value">{deboardTarget.name}</span>
+                </div>
+                <div className="manifest-item">
+                  <span className="manifest-label">🪪 SAP ID</span>
+                  <span className="manifest-value font-mono">{deboardTarget.sapId}</span>
+                </div>
+                <div className="manifest-item">
+                  <span className="manifest-label">📍 Trip Route</span>
+                  <span className="manifest-value">{deboardTarget.from} &rarr; {deboardTarget.to}</span>
+                </div>
+                <div className="manifest-item">
+                  <span className="manifest-label">⏰ Boarding Time</span>
+                  <span className="manifest-value">{deboardTarget.boardingTime}</span>
+                </div>
               </div>
 
-              <p style={{ color: '#38bdf8', fontSize: '13px', marginTop: '14px', marginBottom: 0 }}>
-                ℹ️ Deboarding frees up 1 seat immediately on {driverBus.busNo}.
-              </p>
+              <div className="modal-info-callout">
+                <span>ℹ️ Deboarding immediately returns 1 seat to active circulation on {driverBus.busNo}.</span>
+              </div>
             </div>
 
-            <div className="modal-actions" style={{ justifyContent: 'center', gap: '14px' }}>
+            <div className="modal-actions-bar">
               <button
                 type="button"
-                className="btn btn-secondary-custom"
+                className="btn-modal-cancel"
                 onClick={() => setDeboardTarget(null)}
               >
                 Cancel
               </button>
               <button
                 type="button"
-                className="btn btn-student"
-                style={{
-                  background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                  borderColor: '#ef4444',
-                  boxShadow: '0 4px 16px rgba(239, 68, 68, 0.4)'
-                }}
+                className="btn-modal-danger-solid"
                 onClick={confirmDeboardStudent}
               >
                 Confirm Deboard
@@ -726,50 +804,59 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
           <div className="modal-container" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div className="modal-title-box">
-                <span className="modal-icon">⚠️</span>
-                <h3>Deboard All Passengers</h3>
+                <span className="modal-icon-badge modal-icon-warning">⚠️</span>
+                <div className="modal-title-text-group">
+                  <h3>Deboard All Passengers</h3>
+                  <p className="modal-subtitle">Clear manifest and reset bus capacity</p>
+                </div>
               </div>
               <button
                 type="button"
                 className="modal-close-btn"
                 onClick={() => setShowDeboardAllModal(false)}
+                aria-label="Close dialog"
               >
                 &times;
               </button>
             </div>
 
-            <div style={{ textAlign: 'center', margin: '14px 0 22px' }}>
-              <p style={{ color: '#cbd5e1', fontSize: '15px', lineHeight: '1.6', margin: '0 0 16px' }}>
+            <div className="modal-body-content">
+              <p className="modal-confirm-desc">
                 Are you sure you want to deboard all <strong>{boardedList.length} passengers</strong> from <strong>{driverBus.busNo}</strong>?
               </p>
 
-              <div className="modal-info-bar" style={{ flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
-                <div>🚌 <strong>Bus:</strong> {driverBus.busNo} ({driverBus.route})</div>
-                <div>👥 <strong>Passengers to Deboard:</strong> {boardedList.length}</div>
-                <div>💺 <strong>Seat Capacity Reset:</strong> {driverBus.totalCapacity} seats free</div>
+              <div className="modal-manifest-summary">
+                <div className="manifest-item">
+                  <span className="manifest-label">🚌 Shuttle</span>
+                  <span className="manifest-value">{driverBus.busNo} ({driverBus.route})</span>
+                </div>
+                <div className="manifest-item">
+                  <span className="manifest-label">👥 Passengers to Deboard</span>
+                  <span className="manifest-value font-bold text-danger">{boardedList.length} students</span>
+                </div>
+                <div className="manifest-item">
+                  <span className="manifest-label">💺 Available Seats After</span>
+                  <span className="manifest-value font-bold text-success">{driverBus.totalCapacity} seats free</span>
+                </div>
               </div>
 
-              <p style={{ color: '#fca5a5', fontSize: '13px', marginTop: '14px', marginBottom: 0 }}>
-                ⚠️ All passenger records will be cleared and available seats will reset to full capacity.
-              </p>
+              <div className="modal-warning-callout">
+                <span className="warning-callout-icon">⚠️</span>
+                <span>All passenger records will be cleared and available seats will reset to full capacity ({driverBus.totalCapacity} seats).</span>
+              </div>
             </div>
 
-            <div className="modal-actions" style={{ justifyContent: 'center', gap: '14px' }}>
+            <div className="modal-actions-bar">
               <button
                 type="button"
-                className="btn btn-secondary-custom"
+                className="btn-modal-cancel"
                 onClick={() => setShowDeboardAllModal(false)}
               >
                 Cancel
               </button>
               <button
                 type="button"
-                className="btn btn-student"
-                style={{
-                  background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
-                  borderColor: '#ef4444',
-                  boxShadow: '0 4px 16px rgba(239, 68, 68, 0.4)'
-                }}
+                className="btn-modal-danger-solid"
                 onClick={confirmDeboardAll}
               >
                 Deboard All ({boardedList.length})

@@ -33,7 +33,6 @@ export default function Footer() {
 
   return (
     <footer className="app-footer" role="contentinfo" aria-label="Site footer">
-      <div className="footer-glow-bar" />
       <div className="footer-container">
 
         {/* Left: Brand Logo & Copyright */}
