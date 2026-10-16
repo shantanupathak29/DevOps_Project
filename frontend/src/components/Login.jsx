@@ -82,13 +82,9 @@ export default function Login({ onLogin }) {
         <div className="login-card-container">
           <div className="login-card">
             <div className="login-card-header">
-              <div className="auth-pill-tag">
-                <span>PORTAL AUTHENTICATION</span>
-              </div>
+              
               <h2 className="login-form-title">Welcome to CampusRide</h2>
-              <p className="login-form-desc">
-                Select your role to access shuttle schedules or driver operations.
-              </p>
+              
             </div>
 
             {/* Role Switcher Tabs */}
