@@ -27,17 +27,7 @@ export default function Login({ onLogin }) {
       <div className="login-layout-wrapper">
         {/* Left Side: Editorial Transit Banner */}
         <div className="login-brand-panel">
-          <div className="brand-header-mini">
-            <img
-              src="/campusride-logo.png"
-              alt="CampusRide Logo"
-              className="login-brand-logo"
-            />
-            <div className="brand-badge-pill">
-              <span className="live-dot-ping"></span>
-              <span>LIVE TRANSIT TELEMETRY</span>
-            </div>
-          </div>
+
 
           <div className="brand-hero-text">
             <h1 className="brand-hero-title">
@@ -82,9 +72,9 @@ export default function Login({ onLogin }) {
         <div className="login-card-container">
           <div className="login-card">
             <div className="login-card-header">
-              
+
               <h2 className="login-form-title">Welcome to CampusRide</h2>
-              
+
             </div>
 
             {/* Role Switcher Tabs */}
