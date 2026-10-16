@@ -101,7 +101,7 @@ export default function Login({ onLogin }) {
                   if (!username || username === 'DRIVER01') setUsername('STU1024');
                 }}
               >
-                <span className="tab-icon">🎓</span>
+                <span className="tab-icon"></span>
                 <span className="tab-text">Student Portal</span>
               </button>
               <button
@@ -112,7 +112,7 @@ export default function Login({ onLogin }) {
                   if (!username || username === 'STU1024') setUsername('DRIVER01');
                 }}
               >
-                <span className="tab-icon">🚍</span>
+                <span className="tab-icon"></span>
                 <span className="tab-text">Driver Operations</span>
               </button>
             </div>
@@ -123,7 +123,7 @@ export default function Login({ onLogin }) {
                   {activeTab === 'student' ? 'Student SAP ID' : 'Driver Badge ID'}
                 </label>
                 <div className="input-with-icon">
-                  <span className="field-icon">{activeTab === 'student' ? '🆔' : '🪪'}</span>
+                  <span className="field-icon"></span>
                   <input
                     type="text"
                     id="username"
@@ -138,7 +138,7 @@ export default function Login({ onLogin }) {
               <div className="form-group">
                 <label htmlFor="password">Security Password</label>
                 <div className="input-with-icon">
-                  <span className="field-icon">🔒</span>
+                  <span className="field-icon"></span>
                   <input
                     type="password"
                     id="password"

@@ -155,7 +155,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
               <span className="badge-dot"></span> Operations Cockpit
             </span>
             <span className="portal-badge assigned-bus-badge">
-              🚌 Assigned: {driverBus.busNo}
+               Assigned: {driverBus.busNo}
             </span>
           </div>
           <h2 className="banner-title">Captain <span>{user.username}</span></h2>
@@ -243,7 +243,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
                 onClick={() => setShowDeboardAllModal(true)}
                 title="Deboard all students currently on this bus"
               >
-                🛑 Deboard All ({boardedList.length})
+                Deboard All ({boardedList.length})
               </button>
             )}
             <button
@@ -311,7 +311,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
           {/* Table of Boarded Students */}
           {filteredStudents.length === 0 ? (
             <div className="boarded-empty-state">
-              <div className="empty-icon-box">🪪</div>
+              <div className="empty-icon-box"></div>
               <h3>No Boarded Students Found</h3>
               <p>
                 {studentSearch || stopFilter !== 'All'
@@ -621,7 +621,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
           <div className="modal-container" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div className="modal-title-box">
-                <span className="modal-icon">🪪</span>
+                <span className="modal-icon"></span>
                 <h3>Board New Student onto {driverBus.busNo}</h3>
               </div>
               <button
@@ -636,7 +636,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
             <form onSubmit={handleManualBoardSubmit} className="modal-form">
               {boardError && (
                 <div className="modal-error-banner">
-                  <span>⚠️</span>
+                  <span></span>
                   <span>{boardError}</span>
                 </div>
               )}
@@ -699,8 +699,8 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
               </div>
 
               <div className="modal-info-bar">
-                <span>⏰ Boarding Time: <strong>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong></span>
-                <span>💺 Remaining Seats: <strong>{driverBus.seatsAvailable}</strong></span>
+                <span>Boarding Time: <strong>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong></span>
+                <span>Remaining Seats: <strong>{driverBus.seatsAvailable}</strong></span>
               </div>
 
               <div className="modal-actions">
@@ -731,7 +731,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
           <div className="modal-container" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div className="modal-title-box">
-                <span className="modal-icon-badge modal-icon-rose">🛑</span>
+                <span className="modal-icon-badge modal-icon-rose"></span>
                 <div className="modal-title-text-group">
                   <h3>Confirm Student Deboard</h3>
                   <p className="modal-subtitle">Mark passenger as dropped off</p>
@@ -754,15 +754,15 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
 
               <div className="modal-manifest-summary">
                 <div className="manifest-item">
-                  <span className="manifest-label">👤 Passenger</span>
+                  <span className="manifest-label">Passenger</span>
                   <span className="manifest-value">{deboardTarget.name}</span>
                 </div>
                 <div className="manifest-item">
-                  <span className="manifest-label">🪪 SAP ID</span>
+                  <span className="manifest-label">SAP ID</span>
                   <span className="manifest-value font-mono">{deboardTarget.sapId}</span>
                 </div>
                 <div className="manifest-item">
-                  <span className="manifest-label">📍 Trip Route</span>
+                  <span className="manifest-label">Trip Route</span>
                   <span className="manifest-value">{deboardTarget.from} &rarr; {deboardTarget.to}</span>
                 </div>
                 <div className="manifest-item">
@@ -772,7 +772,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
               </div>
 
               <div className="modal-info-callout">
-                <span>ℹ️ Deboarding immediately returns 1 seat to active circulation on {driverBus.busNo}.</span>
+                <span>Deboarding immediately returns 1 seat to active circulation on {driverBus.busNo}.</span>
               </div>
             </div>
 
