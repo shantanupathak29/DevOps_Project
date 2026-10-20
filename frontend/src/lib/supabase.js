@@ -17,4 +17,6 @@ export const supabase =
 export const supabaseConfigError =
   supabaseUrl && supabaseAnonKey
     ? ''
-    : 'Authentication is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to frontend/.env.local.';
+    : import.meta.env.PROD
+      ? 'Authentication is not configured for this deployment. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Vercel Project Settings → Environment Variables, then redeploy.'
+      : 'Authentication is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to frontend/.env.local.';
