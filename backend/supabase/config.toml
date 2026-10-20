@@ -304,9 +304,6 @@ max_enrolled_factors = 10
 enroll_enabled = false
 verify_enabled = false
 
-[functions.username-login]
-verify_jwt = false
-
 [functions.request-password-reset]
 verify_jwt = false
 

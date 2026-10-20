@@ -14,7 +14,7 @@ the frontend.
 
 The migration creates `public.profiles`, links each row to `auth.users`, applies
 case-insensitive unique usernames, enables RLS, and creates a trigger that
-assigns new users the non-privileged `student` role, and backfills valid,
+assigns new users the non-privileged `student` role and backfills valid,
 non-conflicting usernames for accounts that already exist. Username lookup is not
 available to browser clients. Driver access must be granted by an administrator
 in the database; choosing the driver tab does not grant that role. For example,
@@ -26,11 +26,19 @@ set role = 'driver'
 where id = 'authenticated-user-uuid';
 ```
 
-The repository contained no schema migrations before this change. Before
-applying this migration to the hosted project, inspect its current
-`public.profiles` table and policies in the Supabase Dashboard. Resolve any
-existing table/schema or username conflicts rather than replacing existing
-data. From this folder, authenticate and link to the existing project, then
+The bus operations migration creates `public.buses` for vehicle, route, capacity,
+status, stop, and ETA fields, plus `public.bus_passengers` for active boarding
+records. It seeds the ten existing shuttle schedules. RLS allows authenticated
+users to read bus schedules, students to create/release their own reservation,
+and assigned drivers to manage passenger records and operational bus fields.
+Database triggers update available-seat counts atomically as passengers board
+and deboard. Sample passenger names from the old in-memory demo are not seeded;
+real reservation records are created as users book or drivers check in passengers.
+
+Before applying these migrations to another project, inspect its current
+`public.profiles`, `public.buses`, and `public.bus_passengers` tables and
+policies. Resolve any schema or data conflicts rather than replacing existing
+data. To use the Supabase CLI, authenticate and link to the target project, then
 review the pending SQL before applying:
 
 ```powershell
@@ -40,21 +48,55 @@ npx supabase db push --dry-run
 npx supabase db push
 ```
 
-## Deploy the Edge Functions
+### Apply the migrations in the Supabase SQL Editor
 
-The `username-login` function accepts the username and password, resolves the
-email only inside the trusted function, and returns a Supabase Auth session only
-after Auth verifies the password. `request-password-reset` resolves a username
-privately and responds identically whether an account exists or not. Both
-functions use Supabase-provided environment values, including the service-role
-key, which must never be copied to the client.
+1. Open the existing CampusRide project in the Supabase Dashboard and inspect
+   its current `public.profiles`, `public.buses`, and `public.bus_passengers`
+   schema and policies. Resolve any existing tables or data conflicts before
+   applying these migrations; do not drop existing data to make them run.
+2. Open **SQL Editor** and select **New query**.
+3. Open
+   `backend/supabase/migrations/20261020214500_create_profiles.sql` from this
+   repository, copy its complete contents into the query, and select **Run**.
+   Confirm it succeeds before continuing. This creates the profile table,
+   username uniqueness constraint, RLS policies, signup trigger, and valid
+   username backfill.
+4. Create a second new query. Open
+   `backend/supabase/migrations/20261020223000_create_bus_operations.sql`, copy
+   its complete contents into the query, and select **Run**. This creates the
+   bus and passenger tables, their indexes, RLS policies and seat-count
+   triggers, then seeds the ten schedules used by the current frontend.
+5. Return to CampusRide and choose **Retry connection** or reload the page.
+
+Apply the profile migration first because the bus migration's authorization
+policies use `public.profiles` to distinguish students from drivers. The bus
+table columns and seeded IDs/schedules match the frontend's current
+`buses`/`bus_passengers` queries and bus display fields. Do not seed the old
+in-memory demo passengers; passenger rows represent actual reservations and
+driver check-ins.
+
+For the configured CampusRide project, both migrations were applied on
+2026-10-20 and verified: `public.profiles`, `public.buses`, and
+`public.bus_passengers` exist; the ten bus schedules are present; RLS and
+policies are enabled; and the signup, seat-count, and bus-update triggers are
+installed. They were executed through the Supabase Management API rather than
+`db push`, so the CLI migration history table was not initialized. Before a
+future `db push`, reconcile the remote migration history with the actual schema;
+otherwise the CLI may attempt to run these idempotent migrations again.
+
+## Deploy the password recovery Edge Function
+
+Sign-in uses Supabase Auth's email/password flow directly. The
+`request-password-reset` function resolves a username privately (or accepts an
+email) and responds identically whether an account exists or not. It uses
+Supabase-provided environment values, including the service-role key, which
+must never be copied to the client.
 
 Set the public application origin to the deployed frontend origin (scheme and
-host only), then deploy both functions to the linked project:
+host only), then deploy the recovery function to the linked project:
 
 ```powershell
 npx supabase secrets set APP_ORIGIN=https://your-app.example.com
-npx supabase functions deploy username-login
 npx supabase functions deploy request-password-reset
 ```
 
@@ -95,8 +137,8 @@ direct requests to `/login` and `/reset-password` reach the Vite SPA.
 3. Retry the username and email. A username conflict is enforced by the
    database; Supabase Auth may intentionally respond generically for duplicate
    emails when email confirmation is enabled.
-4. Sign in once with the email and once with the username. Try an incorrect
-   password; username failures must remain generic.
+4. Sign in with the email. Try an incorrect password and verify access is
+   denied.
 5. Refresh after sign-in, then sign out and verify the login view returns.
 6. Request password recovery with both email and username, open the email link,
    set and confirm a new password, then sign in with the new password.
@@ -105,7 +147,12 @@ direct requests to `/login` and `/reset-password` reach the Vite SPA.
 8. In the SQL editor, verify `profiles` has RLS enabled and that an
    authenticated user can only select/update their own profile. Verify an
    authenticated client cannot change `id` or `role`.
+9. After both migrations are applied, sign in and confirm the shuttle rows load
+   from `public.buses`. Book and release a seat, refresh the page, and verify
+   both the reservation in `public.bus_passengers` and the seat count persist.
+   Verify student accounts cannot change bus status or edit other passengers.
 
-The hosted project cannot be introspected or deployed from this workspace.
-Review its existing schema before `db push`, apply the migration, deploy the
-functions, and verify email/redirect configuration in the Dashboard.
+The hosted database schema and seed rows are verified. Complete the manual
+frontend reservation and authentication checks above, deploy the password
+recovery function if it is not already deployed, and verify email/redirect
+configuration in the Dashboard.
