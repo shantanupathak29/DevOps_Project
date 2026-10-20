@@ -152,7 +152,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
         {/* Top Summary Stats */}
         <section className="stats-grid">
           <div className="stat-card">
-            <div className="stat-icon-box" style={{ background: 'transparent', color: '#2e7d7a' }}>
+            <div className="stat-icon-box stat-boarded-icon">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
             <div className="stat-content">
@@ -162,7 +162,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
           </div>
 
           <div className="stat-card">
-            <div className="stat-icon-box" style={{ background: 'transparent', color: '#2e7d7a' }}>
+            <div className="stat-icon-box stat-seats-icon">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 4v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
             </div>
             <div className="stat-content">
@@ -172,13 +172,13 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
           </div>
 
           <div className="stat-card">
-            <div className="stat-icon-box" style={{ background: 'transparent', color: 'var(--primary)' }}>
+            <div className="stat-icon-box stat-eta-icon">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
             <div className="stat-content">
               <h3>Next Stop &amp; ETA</h3>
-              <p className="stat-number" style={{ fontSize: '18px', paddingTop: '4px' }}>
-                {driverBus.nextStop} <span style={{ fontSize: '13px', color: '#2e7d7a' }}>({driverBus.eta})</span>
+              <p className="stat-number">
+                {driverBus.nextStop} <span className="stat-eta-sub">({driverBus.eta})</span>
               </p>
             </div>
           </div>
