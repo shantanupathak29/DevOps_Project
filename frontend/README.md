@@ -1,5 +1,13 @@
 # React + Vite
 
+## Supabase authentication
+
+Copy `.env.example` to `.env.local` and set `VITE_SUPABASE_URL` and
+`VITE_SUPABASE_ANON_KEY` using the existing Supabase project's public
+publishable/anon key. Never put a service-role key in a `VITE_*` variable.
+Database migration, Edge Function deployment, redirect allow-list, email
+verification, and recovery email setup are documented in `../backend/README.md`.
+
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
 Currently, two official plugins are available:
