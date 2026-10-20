@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, onBoardStudent, onDeboardStudent }) {
+export default function StudentDashboard({ user, buses, _onLogout, onBoardStudent, onDeboardStudent }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [directionFilter, setDirectionFilter] = useState('All'); // 'All' | 'Kandoli → Bidholi' | 'Bidholi → Kandoli'
   const [statusFilter, setStatusFilter] = useState('All');
@@ -8,6 +8,7 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
   const [showRouteMap, setShowRouteMap] = useState(false);
   const [selectedBus, setSelectedBus] = useState(null);
   const [expandedBusId, setExpandedBusId] = useState(null);
+  const [savingReservation, setSavingReservation] = useState(false);
 
   // Booking & Deboarding modal state
   const [modalState, setModalState] = useState({
@@ -23,15 +24,17 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
 
   // Find if current student is currently boarded on any bus
   const currentBoardedBus = buses.find(b =>
-    b.boardedStudents?.some(s => s.sapId === currentSapId || s.name === user?.username)
+    b.boardedStudents?.some(s => s.userId === user?.id || s.sapId === currentSapId || s.name === user?.username)
   );
 
   const studentBoardingRecord = currentBoardedBus?.boardedStudents?.find(
-    s => s.sapId === currentSapId || s.name === user?.username
+    s => s.userId === user?.id || s.sapId === currentSapId || s.name === user?.username
   );
 
   const isBoardedOnThisBus = (bus) => {
-    return bus.boardedStudents?.some(s => s.sapId === currentSapId || s.name === user?.username);
+    return bus.boardedStudents?.some(
+      s => s.userId === user?.id || s.sapId === currentSapId || s.name === user?.username,
+    );
   };
 
   // Filter buses based on direction, status, and search
@@ -56,7 +59,7 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
 
   // Helper for occupancy color
   const getCapacityMeta = (seatsAvailable, totalCapacity) => {
-    const occupancyPercent = ((totalCapacity - seatsAvailable) / totalCapacity) * 100;
+    const _occupancyPercent = ((totalCapacity - seatsAvailable) / totalCapacity) * 100;
     if (seatsAvailable === 0) {
       return { label: 'Full', color: '#b91c1c', badgeClass: 'capacity-full', barColor: '#b91c1c' };
     }
@@ -64,6 +67,81 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
       return { label: 'Filling Fast', color: '#b45309', badgeClass: 'capacity-low', barColor: '#b45309' };
     }
     return { label: 'Available', color: '#15803d', badgeClass: 'capacity-good', barColor: '#15803d' };
+  };
+
+  const confirmReservation = async () => {
+    const sapId = modalState.sapId.trim();
+    if (!sapId || !modalState.bus || savingReservation) return;
+
+    const fromStop = modalState.bus.route.includes('Kandoli → Bidholi') ? 'Kandoli' : 'Bidholi';
+    const toStop = modalState.bus.route.includes('Kandoli → Bidholi') ? 'Bidholi' : 'Kandoli';
+    setSavingReservation(true);
+    try {
+      const result = await onBoardStudent(modalState.bus.id, {
+        name: user?.username || 'Student',
+        sapId,
+        from: fromStop,
+        to: toStop,
+      });
+      setModalState((previous) => ({
+        ...previous,
+        mode: result?.success ? 'success' : 'error',
+        message: result?.success
+          ? `Seat confirmed on ${modalState.bus.busNo} (${modalState.bus.route}) for SAP ID ${sapId}.`
+          : result?.message || 'Failed to complete booking.',
+      }));
+    } catch (error) {
+      setModalState((previous) => ({
+        ...previous,
+        mode: 'error',
+        message: error.message || 'Could not save the reservation. Check your connection and try again.',
+      }));
+    } finally {
+      setSavingReservation(false);
+    }
+  };
+
+  const confirmReleaseSeat = async () => {
+    const sapId = modalState.sapId.trim();
+    if (!sapId || savingReservation) return;
+
+    const targetBus = buses.find((bus) => bus.boardedStudents?.some(
+      (passenger) => passenger.sapId.toLowerCase() === sapId.toLowerCase()
+        && (passenger.userId === user?.id || passenger.name === user?.username),
+    ));
+    const targetPassenger = targetBus?.boardedStudents?.find(
+      (passenger) => passenger.sapId.toLowerCase() === sapId.toLowerCase()
+        && (passenger.userId === user?.id || passenger.name === user?.username),
+    );
+
+    if (!targetBus || !targetPassenger) {
+      setModalState((previous) => ({
+        ...previous,
+        mode: 'error',
+        message: `No active reservation found for SAP ID: ${sapId}.`,
+      }));
+      return;
+    }
+
+    setSavingReservation(true);
+    try {
+      const result = await onDeboardStudent(targetBus.id, targetPassenger.id);
+      setModalState((previous) => ({
+        ...previous,
+        mode: result?.success ? 'deboard_success' : 'error',
+        message: result?.success
+          ? `Successfully deboarded from ${targetBus.busNo}. Your seat is returned to circulation.`
+          : result?.message || 'Could not release the reservation.',
+      }));
+    } catch (error) {
+      setModalState((previous) => ({
+        ...previous,
+        mode: 'error',
+        message: error.message || 'Could not release the reservation. Check your connection and try again.',
+      }));
+    } finally {
+      setSavingReservation(false);
+    }
   };
 
   return (
@@ -748,45 +826,10 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
                   </button>
                   <button
                     className="btn-modal-confirm"
-                    onClick={() => {
-                      const sapId = modalState.sapId.trim();
-                      if (!sapId) return;
-
-                      const fromStop = modalState.bus.route.includes('Kandoli → Bidholi') ? 'Kandoli' : 'Bidholi';
-                      const toStop = modalState.bus.route.includes('Kandoli → Bidholi') ? 'Bidholi' : 'Kandoli';
-
-                      if (onBoardStudent) {
-                        const res = onBoardStudent(modalState.bus.id, {
-                          name: user ? user.username : 'Student',
-                          sapId: sapId,
-                          from: fromStop,
-                          to: toStop
-                        });
-
-                        if (res && res.success) {
-                          setModalState(prev => ({
-                            ...prev,
-                            mode: 'success',
-                            message: `Seat confirmed on ${modalState.bus.busNo} (${modalState.bus.route}) for SAP ID ${sapId}.`
-                          }));
-                        } else {
-                          setModalState(prev => ({
-                            ...prev,
-                            mode: 'error',
-                            message: res?.message || 'Failed to complete booking.'
-                          }));
-                        }
-                      } else {
-                        onUpdateBus(modalState.bus.id, { seatsAvailable: Math.max(0, modalState.bus.seatsAvailable - 1) });
-                        setModalState(prev => ({
-                          ...prev,
-                          mode: 'success',
-                          message: `Seat confirmed on ${modalState.bus.busNo} (${modalState.bus.route}) for SAP ID ${sapId}.`
-                        }));
-                      }
-                    }}
+                    onClick={confirmReservation}
+                    disabled={savingReservation}
                   >
-                    Confirm Seat Reservation
+                    {savingReservation ? 'Saving…' : 'Confirm Seat Reservation'}
                   </button>
                 </div>
               </div>
@@ -820,43 +863,10 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
                   </button>
                   <button
                     className="btn-modal-danger"
-                    onClick={() => {
-                      const sapId = modalState.sapId.trim();
-                      if (!sapId) return;
-
-                      let targetBus = null;
-                      let targetPassenger = null;
-
-                      for (const b of buses) {
-                        const found = b.boardedStudents?.find(s => s.sapId.toLowerCase() === sapId.toLowerCase());
-                        if (found) {
-                          targetBus = b;
-                          targetPassenger = found;
-                          break;
-                        }
-                      }
-
-                      if (targetBus && targetPassenger) {
-                        if (onDeboardStudent) {
-                          onDeboardStudent(targetBus.id, targetPassenger.id);
-                        } else {
-                          onUpdateBus(targetBus.id, { seatsAvailable: Math.min(targetBus.totalCapacity, targetBus.seatsAvailable + 1) });
-                        }
-                        setModalState(prev => ({
-                          ...prev,
-                          mode: 'deboard_success',
-                          message: `Successfully deboarded from ${targetBus.busNo}. Your seat is returned to circulation.`
-                        }));
-                      } else {
-                        setModalState(prev => ({
-                          ...prev,
-                          mode: 'error',
-                          message: `No active reservation found for SAP ID: ${sapId}.`
-                        }));
-                      }
-                    }}
+                    onClick={confirmReleaseSeat}
+                    disabled={savingReservation}
                   >
-                    Yes, Release Seat
+                    {savingReservation ? 'Saving…' : 'Yes, Release Seat'}
                   </button>
                 </div>
               </div>

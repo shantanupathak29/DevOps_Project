@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStudent, onDeboardStudent, onDeboardAllStudents, onLogout }) {
+export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStudent, onDeboardStudent, onDeboardAllStudents, _onLogout }) {
   const defaultBus = buses.find(b => b.driver.toLowerCase() === user.username.toLowerCase()) || buses[0];
   const [selectedBusId, setSelectedBusId] = useState(defaultBus ? defaultBus.id : 1);
   const driverBus = buses.find(b => b.id === selectedBusId) || buses[0] || defaultBus;
@@ -20,6 +20,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
     driverBus.route.includes('Kandoli → Bidholi') ? 'Bidholi' : 'Kandoli'
   );
   const [boardError, setBoardError] = useState('');
+  const [savingOperation, setSavingOperation] = useState(false);
 
   // Deboard confirmation modals state (In-UI modals)
   const [deboardTarget, setDeboardTarget] = useState(null);
@@ -88,9 +89,10 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
     onUpdateBus(driverBus.id, { eta: e.target.value });
   };
 
-  const handleManualBoardSubmit = (e) => {
+  const handleManualBoardSubmit = async (e) => {
     e.preventDefault();
     setBoardError('');
+    if (savingOperation) return;
     if (!newStudentName.trim() || !newStudentSap.trim()) {
       setBoardError('Please provide both Student Name and SAP ID.');
       return;
@@ -104,19 +106,27 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
     const now = new Date();
     const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    if (onBoardStudent) {
-      const res = onBoardStudent(driverBus.id, {
-        name: newStudentName.trim(),
-        sapId: newStudentSap.trim(),
-        boardingTime: timeStr,
-        from: newStudentFrom,
-        to: newStudentTo
-      });
+    setSavingOperation(true);
+    try {
+      if (onBoardStudent) {
+        const res = await onBoardStudent(driverBus.id, {
+          name: newStudentName.trim(),
+          sapId: newStudentSap.trim(),
+          boardingTime: timeStr,
+          from: newStudentFrom,
+          to: newStudentTo
+        });
 
-      if (res && !res.success) {
-        setBoardError(res.message || 'Cannot board student.');
-        return;
+        if (res && !res.success) {
+          setBoardError(res.message || 'Cannot board student.');
+          return;
+        }
       }
+    } catch (error) {
+      setBoardError(error.message || 'Could not save the passenger. Check your connection and try again.');
+      return;
+    } finally {
+      setSavingOperation(false);
     }
 
     // Reset Form
@@ -126,19 +136,41 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
     setShowBoardModal(false);
   };
 
-  const confirmDeboardStudent = () => {
+  const confirmDeboardStudent = async () => {
     if (!deboardTarget) return;
-    if (onDeboardStudent) {
-      onDeboardStudent(driverBus.id, deboardTarget.id);
+    if (savingOperation) return;
+    setSavingOperation(true);
+    try {
+      const result = await onDeboardStudent?.(driverBus.id, deboardTarget.id);
+      if (result && !result.success) {
+        setBoardError(result.message || 'Could not release the passenger reservation.');
+        return;
+      }
+      setBoardError('');
+      setDeboardTarget(null);
+    } catch (error) {
+      setBoardError(error.message || 'Could not release the passenger reservation.');
+    } finally {
+      setSavingOperation(false);
     }
-    setDeboardTarget(null);
   };
 
-  const confirmDeboardAll = () => {
-    if (onDeboardAllStudents) {
-      onDeboardAllStudents(driverBus.id);
+  const confirmDeboardAll = async () => {
+    if (savingOperation) return;
+    setSavingOperation(true);
+    try {
+      const success = await onDeboardAllStudents?.(driverBus.id);
+      if (success === false) {
+        setBoardError('Could not clear passengers from this bus.');
+        return;
+      }
+      setBoardError('');
+      setShowDeboardAllModal(false);
+    } catch (error) {
+      setBoardError(error.message || 'Could not clear passengers from this bus.');
+    } finally {
+      setSavingOperation(false);
     }
-    setShowDeboardAllModal(false);
   };
 
   const occupancyRate = Math.round(
@@ -606,9 +638,61 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
             </div>
           </div>
 
-          <div className="info-alert">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-            <p>All student boarding records and seat updates sync instantly with zero latency.</p>
+          {/* Student Portal Live Sync Card */}
+          <div className="preview-card">
+            <h2>Live Student Portal Sync</h2>
+            <p className="card-subtitle">Real-time view rendered on students' devices:</p>
+
+            <div className="preview-bus-card-wrapper">
+              <div className="bus-card selected">
+                <div className="bus-card-header">
+                  <div className="bus-identity">
+                    <div className="bus-avatar">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 4v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                    </div>
+                    <div>
+                      <h4>{driverBus.busNo}</h4>
+                      <p className="bus-route-text">{driverBus.route} ({driverBus.departureTime})</p>
+                    </div>
+                  </div>
+                  <span className={`status-badge status-${driverBus.status.toLowerCase().replace(' ', '-')}`}>
+                    {driverBus.status}
+                  </span>
+                </div>
+
+                <div className="bus-card-details">
+                  <div className="detail-item">
+                    <span className="label">Next Stop</span>
+                    <span className="value">{driverBus.status === 'Out of Service' ? 'N/A' : driverBus.nextStop}</span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="label">Live ETA</span>
+                    <span className="value highlighted">{driverBus.status === 'Out of Service' ? 'N/A' : driverBus.eta}</span>
+                  </div>
+                </div>
+
+                <div className="capacity-section">
+                  <div className="capacity-labels">
+                    <span>Free Seats: <strong>{driverBus.status === 'Out of Service' ? 0 : driverBus.seatsAvailable}</strong></span>
+                    <span>Boarded: {boardedList.length} / {driverBus.totalCapacity}</span>
+                  </div>
+                  <div className="progress-bar-container">
+                    <div
+                      className="progress-bar-fill"
+                      style={{
+                        width: `${driverBus.status === 'Out of Service' ? 100 : occupancyRate}%`,
+                        backgroundColor: driverBus.status === 'Out of Service' ? '#64748b' : driverBus.seatsAvailable <= 5 ? '#ef4444' : driverBus.seatsAvailable <= 12 ? '#f59e0b' : '#10b981'
+                      }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="info-alert">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <p>Confirmed passenger records and bus updates are saved to Supabase.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -714,8 +798,9 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
                 <button
                   type="submit"
                   className="btn btn-student"
-                >
-                  Confirm &amp; Board Student
+                    disabled={savingOperation}
+                  >
+                    {savingOperation ? 'Saving…' : 'Confirm &amp; Board Student'}
                 </button>
               </div>
             </form>
@@ -748,6 +833,12 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
             </div>
 
             <div className="modal-body-content">
+              {boardError && (
+                <div className="modal-error-banner" role="alert">
+                  <span>⚠️</span>
+                  <span>{boardError}</span>
+                </div>
+              )}
               <p className="modal-confirm-desc">
                 Are you sure you want to deboard <strong>{deboardTarget.name}</strong> from <strong>{driverBus.busNo}</strong>?
               </p>
@@ -788,8 +879,9 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
                 type="button"
                 className="btn-modal-danger-solid"
                 onClick={confirmDeboardStudent}
+                disabled={savingOperation}
               >
-                Confirm Deboard
+                {savingOperation ? 'Saving…' : 'Confirm Deboard'}
               </button>
             </div>
           </div>
@@ -821,6 +913,12 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
             </div>
 
             <div className="modal-body-content">
+              {boardError && (
+                <div className="modal-error-banner" role="alert">
+                  <span>⚠️</span>
+                  <span>{boardError}</span>
+                </div>
+              )}
               <p className="modal-confirm-desc">
                 Are you sure you want to deboard all <strong>{boardedList.length} passengers</strong> from <strong>{driverBus.busNo}</strong>?
               </p>
