@@ -14,7 +14,8 @@ the frontend.
 
 The migration creates `public.profiles`, links each row to `auth.users`, applies
 case-insensitive unique usernames, enables RLS, and creates a trigger that
-assigns new users the non-privileged `student` role. Username lookup is not
+assigns new users the non-privileged `student` role, and backfills valid,
+non-conflicting usernames for accounts that already exist. Username lookup is not
 available to browser clients. Driver access must be granted by an administrator
 in the database; choosing the driver tab does not grant that role. For example,
 an administrator can assign a provisioned driver in the SQL Editor:
@@ -76,6 +77,12 @@ In **Authentication → Email Templates**, keep the confirmation template's
 `{{ .ConfirmationURL }}` link intact. The password recovery template should use
 the Supabase recovery link (`{{ .ConfirmationURL }}`), which returns to
 `/reset-password`; never send or store an old password.
+
+With email confirmation enabled, a newly registered account cannot sign in
+until its email link is completed. The login screen now offers **Resend
+verification** after this response and after signup; check spam and wait before
+resending if Supabase's email rate limit was reached. A confirmation link must
+redirect to the current app origin, which must be allow-listed above.
 
 Configure the frontend host to serve `frontend/index.html` for unknown paths so
 direct requests to `/login` and `/reset-password` reach the Vite SPA.

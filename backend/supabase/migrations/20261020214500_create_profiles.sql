@@ -69,3 +69,11 @@ drop trigger if exists campusride_create_profile_after_auth_signup on auth.users
 create trigger campusride_create_profile_after_auth_signup
   after insert on auth.users
   for each row execute function public.handle_new_auth_user();
+
+insert into public.profiles (id, username)
+select
+  users.id,
+  lower(trim(users.raw_user_meta_data ->> 'username'))
+from auth.users as users
+where trim(coalesce(users.raw_user_meta_data ->> 'username', '')) ~ '^[a-zA-Z0-9_]{3,32}$'
+on conflict do nothing;
