@@ -23,12 +23,6 @@ export default function Header({ user, onLogout, currentBoardedBus, onDeboardCli
 
         {/* Center Side: Campus Route Indicator / Quick Badges */}
         <div className="header-center-info">
-          <div className="route-badge">
-            <span className="route-pulse-dot"></span>
-            <span className="route-label">Express Line:</span>
-            <span className="route-stops">Kandoli ↔ Bidholi</span>
-          </div>
-
           {user && (
             <span className={`portal-role-badge ${user.role === 'driver' ? 'role-driver' : 'role-student'}`}>
               <span className="role-icon">{user.role === 'driver' ? '🚍' : '🎓'}</span>
