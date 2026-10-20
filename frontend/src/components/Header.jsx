@@ -23,7 +23,6 @@ export default function Header({ user, onLogout, currentBoardedBus, onDeboardCli
 
         {/* Center Side: Campus Route Indicator / Quick Badges */}
         <div className="header-center-info">
-
           {user && (
             <span className={`portal-role-badge ${user.role === 'driver' ? 'role-driver' : 'role-student'}`}>
               <span className="role-icon">{user.role === 'driver' ? '🚍' : '🎓'}</span>

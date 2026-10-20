@@ -78,9 +78,6 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
               <span className="route-corridor-text">Kandoli Terminal &harr; Bidholi Terminal</span>
             </div>
             <h1 className="portal-main-heading">Student Transit Hub</h1>
-            <p className="portal-sub-heading">
-              Real-time shuttle departures, live seat reservations, and express transit schedule.
-            </p>
           </div>
 
           <div className="portal-subnav-stats">

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import WeatherWidget from './WeatherWidget';
 
 export default function Login({ onLogin }) {
   const [username, setUsername] = useState('');
@@ -27,15 +28,10 @@ export default function Login({ onLogin }) {
       <div className="login-layout-wrapper">
         {/* Left Side: Editorial Transit Banner */}
         <div className="login-brand-panel">
-
-
           <div className="brand-hero-text">
             <h1 className="brand-hero-title">
               Effortless Mobility for <span>Campus Life</span>
             </h1>
-            <p className="brand-hero-subtitle">
-              Real-time shuttle schedules, seat availability tracking, and live route monitoring between Kandoli &amp; Bidholi campuses.
-            </p>
           </div>
 
           <div className="brand-stats-row">
@@ -66,6 +62,9 @@ export default function Login({ onLogin }) {
               <span>Bidholi Campus</span>
             </div>
           </div>
+
+          {/* Real-time Campus Weather Telemetry */}
+          <WeatherWidget />
         </div>
 
         {/* Right Side: Interactive Login Portal */}
