@@ -10,6 +10,13 @@ Copy `frontend/.env.example` to `frontend/.env.local` and fill in the existing
 project's project URL and publishable/anon key. Never use a service-role key in
 the frontend.
 
+For Vercel, add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` to the project
+Environment Variables for each relevant deployment target (Production,
+Preview, and Development). Vite embeds these values during the build, so
+redeploy after changing them. With this repository layout, configure Vercel's
+Root Directory as `frontend`, build command as `npm run build`, and output
+directory as `dist`.
+
 ## Review and apply the migration
 
 The migration creates `public.profiles`, links each row to `auth.users`, applies
@@ -17,14 +24,25 @@ case-insensitive unique usernames, enables RLS, and creates a trigger that
 assigns new users the non-privileged `student` role and backfills valid,
 non-conflicting usernames for accounts that already exist. Username lookup is not
 available to browser clients. Driver access must be granted by an administrator
-in the database; choosing the driver tab does not grant that role. For example,
-an administrator can assign a provisioned driver in the SQL Editor:
+in the database; choosing the Driver Operations tab does not grant that role.
+After successful authentication, the frontend routes to the portal indicated
+by the account's `public.profiles.role`. New users start as students. To grant a
+provisioned account driver access, an administrator can run this query in the
+Supabase SQL Editor, replacing the email with the driver's account email:
 
 ```sql
 update public.profiles
 set role = 'driver'
-where id = 'authenticated-user-uuid';
+where id = (
+  select id
+  from auth.users
+  where email = lower(trim('driver@example.com'))
+);
 ```
+
+Confirm exactly one profile was updated before asking the driver to sign in
+again. Do not grant driver access based only on the portal tab selected in the
+browser; database roles also control driver database permissions through RLS.
 
 The bus operations migration creates `public.buses` for vehicle, route, capacity,
 status, stop, and ETA fields, plus `public.bus_passengers` for active boarding
