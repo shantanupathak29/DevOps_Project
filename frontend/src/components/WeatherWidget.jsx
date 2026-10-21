@@ -353,42 +353,6 @@ export default function WeatherWidget() {
             </div>
           </div>
 
-          {/* 4-Card Weather Telemetry Metrics Grid */}
-          <div className="weather-metrics-grid">
-            <div className="weather-metric-item">
-              <span className="metric-icon">💧</span>
-              <div className="metric-meta">
-                <span className="metric-val">{weather?.humidity}%</span>
-                <span className="metric-name">Humidity</span>
-              </div>
-            </div>
-
-            <div className="weather-metric-item">
-              <span className="metric-icon">💨</span>
-              <div className="metric-meta">
-                <span className="metric-val">{weather?.windSpeed} km/h</span>
-                <span className="metric-name">Wind Speed</span>
-              </div>
-            </div>
-
-            <div className="weather-metric-item">
-              <span className="metric-icon">🌧️</span>
-              <div className="metric-meta">
-                <span className="metric-val">{weather?.precipitation} mm</span>
-                <span className="metric-name">Rainfall</span>
-              </div>
-            </div>
-
-            <div className="weather-metric-item">
-              <span className="metric-icon">⛰️</span>
-              <div className="metric-meta">
-                <span className="metric-val">
-                  {selectedCampus === 'kandoli' ? '740m' : '860m'}
-                </span>
-                <span className="metric-name">Elevation</span>
-              </div>
-            </div>
-          </div>
 
           {/* Transit Route Advisory Banner */}
           <div className={`weather-advisory-strip impact-${weather?.impactLevel}`}>
