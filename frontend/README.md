@@ -8,6 +8,28 @@ publishable/anon key. Never put a service-role key in a `VITE_*` variable.
 Database migration, Edge Function deployment, redirect allow-list, email
 verification, and recovery email setup are documented in `../backend/README.md`.
 
+## Deploy to Vercel
+
+Vite embeds `VITE_*` variables into the frontend when it builds. The ignored
+local `.env.local` file is not deployed, so configure both variables in the
+Vercel project's **Settings → Environment Variables**:
+
+- `VITE_SUPABASE_URL`: the existing Supabase project's URL.
+- `VITE_SUPABASE_ANON_KEY`: that project's public publishable/anon key (never a
+  service-role key).
+
+Enable both variables for every deployment target that should use
+authentication: **Production**, **Preview**, and **Development** as applicable.
+If the Vercel project is connected to this repository's root, set its **Root
+Directory** to `frontend`. Use the Vite build command `npm run build` and output
+directory `dist`.
+
+Save the variables, then create a new deployment (redeploy the latest commit or
+push a new commit). Updating Vercel variables does not change an already-built
+deployment. If either variable is absent from a build, the app shows an
+authentication configuration message instead of initializing the Supabase
+client.
+
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
 Currently, two official plugins are available:
