@@ -2740,8 +2740,9 @@ body {
   left: 50%;
   transform: translateX(-50%) translateY(4px);
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
-  transition: all 0.15s ease;
+  transition: opacity 0.25s ease 0.4s, transform 0.25s ease 0.4s, visibility 0.25s ease 0.4s;
   background: var(--bg-surface);
   border: 1px solid var(--border-medium);
   border-radius: 10px;
@@ -2752,10 +2753,24 @@ body {
   text-align: left;
 }
 
-.dev-chip-wrapper:hover .dev-popover {
+/* Invisible hover bridge between the chip and the popover so cursor doesn't fall through */
+.dev-popover::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 14px;
+  background: transparent;
+}
+
+.dev-chip-wrapper:hover .dev-popover,
+.dev-popover:hover {
   opacity: 1;
+  visibility: visible;
   pointer-events: auto;
   transform: translateX(-50%) translateY(0);
+  transition-delay: 0s;
 }
 
 .dev-popover-header {
