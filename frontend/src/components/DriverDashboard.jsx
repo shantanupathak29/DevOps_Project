@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStudent, onDeboardStudent, onDeboardAllStudents, onLogout }) {
+export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStudent, onDeboardStudent, onDeboardAllStudents, _onLogout }) {
   const defaultBus = buses.find(b => b.driver.toLowerCase() === user.username.toLowerCase()) || buses[0];
   const [selectedBusId, setSelectedBusId] = useState(defaultBus ? defaultBus.id : 1);
   const driverBus = buses.find(b => b.id === selectedBusId) || buses[0] || defaultBus;
@@ -20,6 +20,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
     driverBus.route.includes('Kandoli → Bidholi') ? 'Bidholi' : 'Kandoli'
   );
   const [boardError, setBoardError] = useState('');
+  const [savingOperation, setSavingOperation] = useState(false);
 
   // Deboard confirmation modals state (In-UI modals)
   const [deboardTarget, setDeboardTarget] = useState(null);
@@ -52,6 +53,28 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
     }
   };
 
+  const handleResetAllSeatsAndDeboard = () => {
+    if (onDeboardAllStudents) {
+      onDeboardAllStudents(driverBus.id);
+    } else {
+      onUpdateBus(driverBus.id, {
+        seatsAvailable: driverBus.totalCapacity,
+        boardedStudents: []
+      });
+    }
+  };
+
+  const handleCapacityChange = (newCapacity) => {
+    const minCap = Math.max(1, boardedList.length);
+    const safeCapacity = Math.max(minCap, Math.min(100, newCapacity));
+    const occupied = boardedList.length;
+    const newAvailable = Math.max(0, safeCapacity - occupied);
+    onUpdateBus(driverBus.id, {
+      totalCapacity: safeCapacity,
+      seatsAvailable: newAvailable
+    });
+  };
+
   const handleStatusChange = (e) => {
     onUpdateBus(driverBus.id, { status: e.target.value });
   };
@@ -66,9 +89,10 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
     onUpdateBus(driverBus.id, { eta: e.target.value });
   };
 
-  const handleManualBoardSubmit = (e) => {
+  const handleManualBoardSubmit = async (e) => {
     e.preventDefault();
     setBoardError('');
+    if (savingOperation) return;
     if (!newStudentName.trim() || !newStudentSap.trim()) {
       setBoardError('Please provide both Student Name and SAP ID.');
       return;
@@ -82,19 +106,27 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
     const now = new Date();
     const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    if (onBoardStudent) {
-      const res = onBoardStudent(driverBus.id, {
-        name: newStudentName.trim(),
-        sapId: newStudentSap.trim(),
-        boardingTime: timeStr,
-        from: newStudentFrom,
-        to: newStudentTo
-      });
-      
-      if (res && !res.success) {
-        setBoardError(res.message || 'Cannot board student.');
-        return;
+    setSavingOperation(true);
+    try {
+      if (onBoardStudent) {
+        const res = await onBoardStudent(driverBus.id, {
+          name: newStudentName.trim(),
+          sapId: newStudentSap.trim(),
+          boardingTime: timeStr,
+          from: newStudentFrom,
+          to: newStudentTo
+        });
+
+        if (res && !res.success) {
+          setBoardError(res.message || 'Cannot board student.');
+          return;
+        }
       }
+    } catch (error) {
+      setBoardError(error.message || 'Could not save the passenger. Check your connection and try again.');
+      return;
+    } finally {
+      setSavingOperation(false);
     }
 
     // Reset Form
@@ -104,19 +136,41 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
     setShowBoardModal(false);
   };
 
-  const confirmDeboardStudent = () => {
+  const confirmDeboardStudent = async () => {
     if (!deboardTarget) return;
-    if (onDeboardStudent) {
-      onDeboardStudent(driverBus.id, deboardTarget.id);
+    if (savingOperation) return;
+    setSavingOperation(true);
+    try {
+      const result = await onDeboardStudent?.(driverBus.id, deboardTarget.id);
+      if (result && !result.success) {
+        setBoardError(result.message || 'Could not release the passenger reservation.');
+        return;
+      }
+      setBoardError('');
+      setDeboardTarget(null);
+    } catch (error) {
+      setBoardError(error.message || 'Could not release the passenger reservation.');
+    } finally {
+      setSavingOperation(false);
     }
-    setDeboardTarget(null);
   };
 
-  const confirmDeboardAll = () => {
-    if (onDeboardAllStudents) {
-      onDeboardAllStudents(driverBus.id);
+  const confirmDeboardAll = async () => {
+    if (savingOperation) return;
+    setSavingOperation(true);
+    try {
+      const success = await onDeboardAllStudents?.(driverBus.id);
+      if (success === false) {
+        setBoardError('Could not clear passengers from this bus.');
+        return;
+      }
+      setBoardError('');
+      setShowDeboardAllModal(false);
+    } catch (error) {
+      setBoardError(error.message || 'Could not clear passengers from this bus.');
+    } finally {
+      setSavingOperation(false);
     }
-    setShowDeboardAllModal(false);
   };
 
   const occupancyRate = Math.round(
@@ -133,7 +187,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
               <span className="badge-dot"></span> Operations Cockpit
             </span>
             <span className="portal-badge assigned-bus-badge">
-              🚌 Assigned: {driverBus.busNo}
+              Assigned: {driverBus.busNo}
             </span>
           </div>
           <h2 className="banner-title">Captain <span>{user.username}</span></h2>
@@ -149,341 +203,437 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
         </div>
       </div>
 
-        {/* Top Summary Stats */}
-        <section className="stats-grid">
-          <div className="stat-card">
-            <div className="stat-icon-box stat-boarded-icon">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            </div>
-            <div className="stat-content">
-              <h3>Currently Boarded</h3>
-              <p className="stat-number">{boardedList.length} <span className="stat-total">/ {driverBus.totalCapacity}</span></p>
-            </div>
+      {/* Top Summary Stats - Horizontal Alignment */}
+      <section className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-icon-box stat-boarded-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
           </div>
-
-          <div className="stat-card">
-            <div className="stat-icon-box stat-seats-icon">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 4v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-            </div>
-            <div className="stat-content">
-              <h3>Empty Seats Free</h3>
-              <p className="stat-number">{driverBus.seatsAvailable}</p>
-            </div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-icon-box stat-eta-icon">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            </div>
-            <div className="stat-content">
-              <h3>Next Stop &amp; ETA</h3>
-              <p className="stat-number">
-                {driverBus.nextStop} <span className="stat-eta-sub">({driverBus.eta})</span>
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Bus Selector Bar */}
-        <div className="driver-bus-selector-bar">
-          <div className="selector-left">
-            <label htmlFor="bus-select-id">Assigned Bus Management:</label>
-            <select
-              id="bus-select-id"
-              value={selectedBusId}
-              onChange={(e) => {
-                const newId = parseInt(e.target.value, 10);
-                setSelectedBusId(newId);
-                const b = buses.find(x => x.id === newId);
-                if (b) {
-                  setNewStudentFrom(b.route.includes('Kandoli → Bidholi') ? 'Kandoli' : 'Bidholi');
-                  setNewStudentTo(b.route.includes('Kandoli → Bidholi') ? 'Bidholi' : 'Kandoli');
-                }
-              }}
-              className="form-control bus-select-dropdown"
-            >
-              {buses.map(b => (
-                <option key={b.id} value={b.id}>
-                  {b.busNo} &mdash; {b.route} ({b.driver})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="selector-right" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <span className={`status-badge status-${driverBus.status.toLowerCase().replace(' ', '-')}`}>
-              Trip Status: {driverBus.status}
-            </span>
-            {boardedList.length > 0 && (
-              <button
-                type="button"
-                className="btn"
-                style={{
-                  background: 'rgba(239, 68, 68, 0.15)',
-                  border: '1px solid #ef4444',
-                  color: '#f87171',
-                  padding: '8px 14px',
-                  fontSize: '13px',
-                  borderRadius: '10px',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                  transition: 'all 0.2s ease'
-                }}
-                onClick={() => setShowDeboardAllModal(true)}
-                title="Deboard all students currently on this bus"
-              >
-                🛑 Deboard All ({boardedList.length})
-              </button>
-            )}
-            <button
-              type="button"
-              className="btn btn-student btn-sm-board"
-              onClick={() => {
-                setBoardError('');
-                setShowBoardModal(true);
-              }}
-              disabled={driverBus.seatsAvailable <= 0 || driverBus.status === 'Out of Service'}
-            >
-              <span>Board Student</span>
-            </button>
+          <div className="stat-content">
+            <h3>Currently Boarded</h3>
+            <p className="stat-number">{boardedList.length} <span className="stat-total">/ {driverBus.totalCapacity}</span></p>
           </div>
         </div>
 
-        {/* ===================================================================
+        <div className="stat-card">
+          <div className="stat-icon-box stat-seats-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13" rx="2" /><path d="M16 8h4l3 4v4h-7V8z" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" /></svg>
+          </div>
+          <div className="stat-content">
+            <h3>Empty Seats Free</h3>
+            <p className="stat-number">{driverBus.seatsAvailable}</p>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon-box stat-eta-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+          </div>
+          <div className="stat-content">
+            <h3>Next Stop &amp; ETA</h3>
+            <p className="stat-number">
+              {driverBus.nextStop} <span className="stat-eta-sub">({driverBus.eta})</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Bus Selector Bar */}
+      <div className="driver-bus-selector-bar">
+        <div className="selector-left">
+          <label htmlFor="bus-select-id">Assigned Bus Management:</label>
+          <select
+            id="bus-select-id"
+            value={selectedBusId}
+            onChange={(e) => {
+              const newId = parseInt(e.target.value, 10);
+              setSelectedBusId(newId);
+              const b = buses.find(x => x.id === newId);
+              if (b) {
+                setNewStudentFrom(b.route.includes('Kandoli → Bidholi') ? 'Kandoli' : 'Bidholi');
+                setNewStudentTo(b.route.includes('Kandoli → Bidholi') ? 'Bidholi' : 'Kandoli');
+              }
+            }}
+            className="form-control bus-select-dropdown form-select-enhanced"
+          >
+            {buses.map(b => (
+              <option key={b.id} value={b.id}>
+                {b.busNo} &mdash; {b.route} ({b.driver})
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="selector-right" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <span className={`status-badge status-${driverBus.status.toLowerCase().replace(' ', '-')}`}>
+            Trip Status: {driverBus.status}
+          </span>
+          {boardedList.length > 0 && (
+            <button
+              type="button"
+              className="btn-deboard-all-top"
+              onClick={() => setShowDeboardAllModal(true)}
+              title="Deboard all students currently on this bus"
+            >
+              Deboard All ({boardedList.length})
+            </button>
+          )}
+          <button
+            type="button"
+            className="btn btn-student btn-sm-board"
+            onClick={() => {
+              setBoardError('');
+              setShowBoardModal(true);
+            }}
+            disabled={driverBus.seatsAvailable <= 0 || driverBus.status === 'Out of Service'}
+          >
+            <span>Board Student</span>
+          </button>
+        </div>
+      </div>
+
+      {/* ===================================================================
             SECTION: CURRENTLY BOARDED STUDENTS RECORD TABLE
             =================================================================== */}
-        <div className="boarded-students-panel">
-          <div className="panel-header">
-            <div className="panel-title-group">
-              <div className="panel-icon-circle">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              </div>
-              <div>
-                <h2>Currently Boarded Students Record</h2>
-                <p className="panel-subtitle">
-                  Live passenger manifest for <strong>{driverBus.busNo}</strong> ({driverBus.route})
-                </p>
-              </div>
+      <div className="boarded-students-panel">
+        <div className="panel-header">
+          <div className="panel-title-group">
+            <div className="panel-icon-circle">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
             </div>
-
-            <div className="panel-badge-count">
-              <span className="live-dot-ping"></span>
-              <span>{boardedList.length} Students Onboard</span>
+            <div>
+              <h2>Currently Boarded Students Record</h2>
+              <p className="panel-subtitle">
+                Live passenger manifest for <strong>{driverBus.busNo}</strong> ({driverBus.route})
+              </p>
             </div>
           </div>
 
-          {/* Search and Filters Bar */}
-          <div className="boarded-filter-bar">
-            <div className="boarded-search-box">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input
-                type="text"
-                placeholder="Search by student name, SAP ID, from/to stop..."
-                value={studentSearch}
-                onChange={(e) => setStudentSearch(e.target.value)}
-              />
-              {studentSearch && (
-                <button className="clear-search-btn" onClick={() => setStudentSearch('')}>&times;</button>
-              )}
+          <div className="panel-badge-count">
+            <span className="live-dot-ping"></span>
+            <span>{boardedList.length} Students Onboard</span>
+          </div>
+        </div>
+
+        {/* Search and Filters Bar */}
+        <div className="boarded-filter-bar">
+          <div className="boarded-search-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+            <input
+              type="text"
+              placeholder="Search by student name, SAP ID, from/to stop..."
+              value={studentSearch}
+              onChange={(e) => setStudentSearch(e.target.value)}
+            />
+            {studentSearch && (
+              <button className="clear-search-btn" onClick={() => setStudentSearch('')}>&times;</button>
+            )}
+          </div>
+
+          <div className="boarded-stop-filter">
+            <label>Filter Stop:</label>
+            <select value={stopFilter} onChange={(e) => setStopFilter(e.target.value)}>
+              <option value="All">All Stops</option>
+              <option value="Kandoli">Kandoli</option>
+              <option value="Bidholi">Bidholi</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Table of Boarded Students */}
+        {filteredStudents.length === 0 ? (
+          <div className="boarded-empty-state">
+            <div className="empty-icon-box"></div>
+            <h3>No Boarded Students Found</h3>
+            <p>
+              {studentSearch || stopFilter !== 'All'
+                ? 'No passenger records match your filter criteria.'
+                : `There are currently no students checked in on ${driverBus.busNo}. Use the "+ Board Student" button to record walk-in passengers.`}
+            </p>
+            {driverBus.seatsAvailable > 0 && driverBus.status !== 'Out of Service' && (
+              <button
+                type="button"
+                className="btn btn-student"
+                style={{ marginTop: '14px' }}
+                onClick={() => setShowBoardModal(true)}
+              >
+                + Board First Student
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="boarded-table-responsive">
+            <table className="boarded-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Student Name</th>
+                  <th>SAP ID</th>
+                  <th>Boarding Time</th>
+                  <th>Route (From &rarr; To)</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredStudents.map((student, idx) => {
+                  // Extract initials
+                  const initials = student.name
+                    .split(' ')
+                    .map(n => n[0])
+                    .join('')
+                    .toUpperCase()
+                    .slice(0, 2);
+
+                  return (
+                    <tr key={student.id || idx} className="boarded-row">
+                      <td className="col-idx">{idx + 1}</td>
+                      <td className="col-name">
+                        <div className="student-profile-cell">
+                          <span className="student-avatar-chip">{initials}</span>
+                          <span className="student-full-name">{student.name}</span>
+                        </div>
+                      </td>
+                      <td className="col-sap">
+                        <span className="sap-badge">{student.sapId}</span>
+                      </td>
+                      <td className="col-time">
+                        <div className="time-badge">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                          <span>{student.boardingTime}</span>
+                        </div>
+                      </td>
+                      <td className="col-route">
+                        <div className="travel-path-badge">
+                          <span className="stop-badge from-stop">{student.from}</span>
+                          <span className="path-arrow">&rarr;</span>
+                          <span className="stop-badge to-stop">{student.to}</span>
+                        </div>
+                      </td>
+                      <td className="col-status">
+                        <span className="status-pill on-board">
+                          <span className="pill-dot"></span>
+                          Onboard
+                        </span>
+                      </td>
+                      <td className="col-action">
+                        <button
+                          type="button"
+                          className="btn-deboard"
+                          title="Mark student as deboarded / dropped"
+                          onClick={() => setDeboardTarget(student)}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+                          <span>Deboard</span>
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* ===================================================================
+            DRIVER CONTROLS & LIVE PREVIEW GRID
+            =================================================================== */}
+      <div className="driver-dashboard-grid" style={{ marginTop: '24px' }}>
+        {/* Quick Bus Controls Card */}
+        <div className="control-card">
+          <h2>Bus Operations &amp; Seat Controls</h2>
+          <p className="card-subtitle">Manage seats and schedule for <strong>{driverBus.busNo}</strong></p>
+
+          <div className="driver-form">
+            {/* Seat Counter */}
+            <div className="form-group seats-counter-group">
+              <label>Empty Seats Available</label>
+              <div className="counter-controls">
+                <button
+                  type="button"
+                  className="counter-btn"
+                  onClick={handleDecrementSeats}
+                  disabled={driverBus.seatsAvailable <= 0 || driverBus.status === 'Out of Service'}
+                  title="Decrease available seats"
+                >
+                  -
+                </button>
+                <span className="counter-display">{driverBus.seatsAvailable}</span>
+                <button
+                  type="button"
+                  className="counter-btn"
+                  onClick={handleIncrementSeats}
+                  disabled={driverBus.seatsAvailable >= driverBus.totalCapacity || driverBus.status === 'Out of Service'}
+                  title="Increase available seats"
+                >
+                  +
+                </button>
+                <button
+                  type="button"
+                  className="btn-reset-seats"
+                  onClick={handleResetAllSeatsAndDeboard}
+                  disabled={driverBus.status === 'Out of Service'}
+                  title="Deboard all passengers and reset all seats to full capacity"
+                >
+                  Reset All Free
+                </button>
+              </div>
+
+              <div className="progress-bar-container driver-progress">
+                <div
+                  className="progress-bar-fill"
+                  style={{
+                    width: `${occupancyRate}%`,
+                    backgroundColor: driverBus.seatsAvailable <= 5 ? '#ef4444' : driverBus.seatsAvailable <= 12 ? '#f59e0b' : '#10b981'
+                  }}
+                ></div>
+              </div>
+              <p className="input-hint">
+                {occupancyRate}% Full &bull; {boardedList.length} Occupied &bull; {driverBus.totalCapacity} Total Capacity
+              </p>
             </div>
 
-            <div className="boarded-stop-filter">
-              <label>Filter Stop:</label>
-              <select value={stopFilter} onChange={(e) => setStopFilter(e.target.value)}>
-                <option value="All">All Stops</option>
+            {/* Total Bus Capacity Configuration */}
+            <div className="form-group capacity-config-group">
+              <label htmlFor="bus-capacity-input">Total Bus Capacity</label>
+              <div className="capacity-stepper-box">
+                <button
+                  type="button"
+                  className="counter-btn-sm"
+                  onClick={() => handleCapacityChange(driverBus.totalCapacity - 1)}
+                  disabled={driverBus.totalCapacity <= Math.max(1, boardedList.length) || driverBus.status === 'Out of Service'}
+                  title="Decrease total capacity"
+                >
+                  &minus;
+                </button>
+                <input
+                  type="number"
+                  id="bus-capacity-input"
+                  min={Math.max(1, boardedList.length)}
+                  max="100"
+                  value={driverBus.totalCapacity}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value, 10);
+                    if (!isNaN(val) && val >= 1) {
+                      handleCapacityChange(val);
+                    }
+                  }}
+                  className="capacity-input-field"
+                  disabled={driverBus.status === 'Out of Service'}
+                />
+                <button
+                  type="button"
+                  className="counter-btn-sm"
+                  onClick={() => handleCapacityChange(driverBus.totalCapacity + 1)}
+                  disabled={driverBus.totalCapacity >= 100 || driverBus.status === 'Out of Service'}
+                  title="Increase total capacity"
+                >
+                  +
+                </button>
+                <span className="capacity-unit-pill">
+                  {driverBus.totalCapacity} Total Seats
+                </span>
+              </div>
+              <p className="input-hint">
+                Configure maximum vehicle capacity ({boardedList.length} onboard currently).
+              </p>
+            </div>
+
+            {/* Status Dropdown */}
+            <div className="form-group">
+              <label htmlFor="bus-status-select">Trip Status</label>
+              <select
+                id="bus-status-select"
+                value={driverBus.status}
+                onChange={handleStatusChange}
+                className="form-select-enhanced"
+              >
+                <option value="Active">Active</option>
+                <option value="In-Transit">In-Transit</option>
+                <option value="Delayed">Delayed</option>
+                <option value="Out of Service">Out of Service</option>
+              </select>
+            </div>
+
+            {/* Next Stop Dropdown */}
+            <div className="form-group">
+              <label htmlFor="bus-next-stop-select">Next Campus Stop</label>
+              <select
+                id="bus-next-stop-select"
+                value={driverBus.nextStop}
+                onChange={handleStopChange}
+                disabled={driverBus.status === 'Out of Service'}
+                className="form-select-enhanced"
+              >
                 <option value="Kandoli">Kandoli</option>
                 <option value="Bidholi">Bidholi</option>
               </select>
             </div>
+
+            {/* ETA Input */}
+            <div className="form-group">
+              <label htmlFor="bus-eta-input">Estimated Time of Arrival (ETA)</label>
+              <input
+                type="text"
+                id="bus-eta-input"
+                value={driverBus.eta}
+                onChange={handleEtaChange}
+                placeholder="e.g. 15 mins"
+                disabled={driverBus.status === 'Out of Service'}
+                className="form-input-enhanced"
+              />
+            </div>
           </div>
-
-          {/* Table of Boarded Students */}
-          {filteredStudents.length === 0 ? (
-            <div className="boarded-empty-state">
-              <div className="empty-icon-box">🪪</div>
-              <h3>No Boarded Students Found</h3>
-              <p>
-                {studentSearch || stopFilter !== 'All'
-                  ? 'No passenger records match your filter criteria.'
-                  : `There are currently no students checked in on ${driverBus.busNo}. Use the "+ Board Student" button to record walk-in passengers.`}
-              </p>
-              {driverBus.seatsAvailable > 0 && driverBus.status !== 'Out of Service' && (
-                <button
-                  type="button"
-                  className="btn btn-student"
-                  style={{ marginTop: '14px' }}
-                  onClick={() => setShowBoardModal(true)}
-                >
-                  + Board First Student
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="boarded-table-responsive">
-              <table className="boarded-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Student Name</th>
-                    <th>SAP ID</th>
-                    <th>Boarding Time</th>
-                    <th>Route (From &rarr; To)</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredStudents.map((student, idx) => {
-                    // Extract initials
-                    const initials = student.name
-                      .split(' ')
-                      .map(n => n[0])
-                      .join('')
-                      .toUpperCase()
-                      .slice(0, 2);
-
-                    return (
-                      <tr key={student.id || idx} className="boarded-row">
-                        <td className="col-idx">{idx + 1}</td>
-                        <td className="col-name">
-                          <div className="student-profile-cell">
-                            <span className="student-avatar-chip">{initials}</span>
-                            <span className="student-full-name">{student.name}</span>
-                          </div>
-                        </td>
-                        <td className="col-sap">
-                          <span className="sap-badge">{student.sapId}</span>
-                        </td>
-                        <td className="col-time">
-                          <div className="time-badge">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                            <span>{student.boardingTime}</span>
-                          </div>
-                        </td>
-                        <td className="col-route">
-                          <div className="travel-path-badge">
-                            <span className="stop-badge from-stop">{student.from}</span>
-                            <span className="path-arrow">&rarr;</span>
-                            <span className="stop-badge to-stop">{student.to}</span>
-                          </div>
-                        </td>
-                        <td className="col-status">
-                          <span className="status-pill on-board">
-                            <span className="pill-dot"></span>
-                            Onboard
-                          </span>
-                        </td>
-                        <td className="col-action">
-                          <button
-                            type="button"
-                            className="btn-deboard"
-                            title="Mark student as deboarded / dropped"
-                            onClick={() => setDeboardTarget(student)}
-                          >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                            <span>Deboard</span>
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
         </div>
 
-        {/* ===================================================================
-            DRIVER CONTROLS & LIVE PREVIEW GRID
-            =================================================================== */}
-        <div className="driver-dashboard-grid" style={{ marginTop: '24px' }}>
-          {/* Quick Bus Controls Card */}
-          <div className="control-card">
-            <h2>Bus Operations &amp; Seat Controls</h2>
-            <p className="card-subtitle">Manage seats and schedule for <strong>{driverBus.busNo}</strong></p>
+        {/* Student Portal Live Sync Card */}
+        <div className="preview-card">
+          <h2>Live Student Portal Sync</h2>
+          <p className="card-subtitle">Real-time view rendered on students' devices:</p>
 
-            <div className="driver-form">
-              {/* Seat Counter */}
-              <div className="form-group seats-counter-group">
-                <label>Empty Seats Available</label>
-                <div className="counter-controls">
-                  <button
-                    type="button"
-                    className="counter-btn"
-                    onClick={handleDecrementSeats}
-                    disabled={driverBus.seatsAvailable <= 0 || driverBus.status === 'Out of Service'}
-                  >
-                    -
-                  </button>
-                  <span className="counter-display">{driverBus.seatsAvailable}</span>
-                  <button
-                    type="button"
-                    className="counter-btn"
-                    onClick={handleIncrementSeats}
-                    disabled={driverBus.seatsAvailable >= driverBus.totalCapacity || driverBus.status === 'Out of Service'}
-                  >
-                    +
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-reset-seats"
-                    onClick={() => onUpdateBus(driverBus.id, { seatsAvailable: driverBus.totalCapacity })}
-                    disabled={driverBus.status === 'Out of Service'}
-                  >
-                    Reset All Free
-                  </button>
+          <div className="preview-bus-card-wrapper">
+            <div className="bus-card selected">
+              <div className="bus-card-header">
+                <div className="bus-identity">
+                  <div className="bus-avatar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="3" width="15" height="13" rx="2" /><path d="M16 8h4l3 4v4h-7V8z" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" /></svg>
+                  </div>
+                  <div>
+                    <h4>{driverBus.busNo}</h4>
+                    <p className="bus-route-text">{driverBus.route} ({driverBus.departureTime})</p>
+                  </div>
                 </div>
+                <span className={`status-badge status-${driverBus.status.toLowerCase().replace(' ', '-')}`}>
+                  {driverBus.status}
+                </span>
+              </div>
 
-                <div className="progress-bar-container driver-progress">
+              <div className="bus-card-details">
+                <div className="detail-item">
+                  <span className="label">Next Stop</span>
+                  <span className="value">{driverBus.status === 'Out of Service' ? 'N/A' : driverBus.nextStop}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="label">Live ETA</span>
+                  <span className="value highlighted">{driverBus.status === 'Out of Service' ? 'N/A' : driverBus.eta}</span>
+                </div>
+              </div>
+
+              <div className="capacity-section">
+                <div className="capacity-labels">
+                  <span>Free Seats: <strong>{driverBus.status === 'Out of Service' ? 0 : driverBus.seatsAvailable}</strong></span>
+                  <span>Boarded: {boardedList.length} / {driverBus.totalCapacity}</span>
+                </div>
+                <div className="progress-bar-container">
                   <div
                     className="progress-bar-fill"
                     style={{
-                      width: `${occupancyRate}%`,
-                      backgroundColor: driverBus.seatsAvailable <= 5 ? '#ef4444' : driverBus.seatsAvailable <= 12 ? '#f59e0b' : '#10b981'
+                      width: `${driverBus.status === 'Out of Service' ? 100 : occupancyRate}%`,
+                      backgroundColor: driverBus.status === 'Out of Service' ? '#64748b' : driverBus.seatsAvailable <= 5 ? '#ef4444' : driverBus.seatsAvailable <= 12 ? '#f59e0b' : '#10b981'
                     }}
                   ></div>
                 </div>
-                <p className="input-hint">
-                  {occupancyRate}% Full &bull; {boardedList.length} Occupied &bull; {driverBus.totalCapacity} Total Capacity
-                </p>
-              </div>
-
-              {/* Status Dropdown */}
-              <div className="form-group">
-                <label htmlFor="bus-status-select">Trip Status</label>
-                <select id="bus-status-select" value={driverBus.status} onChange={handleStatusChange}>
-                  <option value="Active">Active</option>
-                  <option value="In-Transit">In-Transit</option>
-                  <option value="Delayed">Delayed</option>
-                  <option value="Out of Service">Out of Service</option>
-                </select>
-              </div>
-
-              {/* Next Stop Dropdown */}
-              <div className="form-group">
-                <label htmlFor="bus-next-stop-select">Next Campus Stop</label>
-                <select
-                  id="bus-next-stop-select"
-                  value={driverBus.nextStop}
-                  onChange={handleStopChange}
-                  disabled={driverBus.status === 'Out of Service'}
-                >
-                  <option value="Kandoli">Kandoli</option>
-                  <option value="Bidholi">Bidholi</option>
-                </select>
-              </div>
-
-              {/* ETA Input */}
-              <div className="form-group">
-                <label htmlFor="bus-eta-input">Estimated Time of Arrival (ETA)</label>
-                <input
-                  type="text"
-                  id="bus-eta-input"
-                  value={driverBus.eta}
-                  onChange={handleEtaChange}
-                  placeholder="e.g. 15 mins"
-                  disabled={driverBus.status === 'Out of Service'}
-                />
               </div>
             </div>
           </div>
@@ -541,10 +691,11 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
 
             <div className="info-alert">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <p>All student boarding records and seat updates sync instantly with zero latency.</p>
+              <p>Confirmed passenger records and bus updates are saved to Supabase.</p>
             </div>
           </div>
         </div>
+      </div>
 
       {/* ===================================================================
           MODAL: MANUAL BOARD STUDENT
@@ -554,7 +705,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
           <div className="modal-container" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div className="modal-title-box">
-                <span className="modal-icon">🪪</span>
+                <span className="modal-icon"></span>
                 <h3>Board New Student onto {driverBus.busNo}</h3>
               </div>
               <button
@@ -569,7 +720,7 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
             <form onSubmit={handleManualBoardSubmit} className="modal-form">
               {boardError && (
                 <div className="modal-error-banner">
-                  <span>⚠️</span>
+                  <span></span>
                   <span>{boardError}</span>
                 </div>
               )}
@@ -632,8 +783,8 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
               </div>
 
               <div className="modal-info-bar">
-                <span>⏰ Boarding Time: <strong>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong></span>
-                <span>💺 Remaining Seats: <strong>{driverBus.seatsAvailable}</strong></span>
+                <span>Boarding Time: <strong>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong></span>
+                <span>Remaining Seats: <strong>{driverBus.seatsAvailable}</strong></span>
               </div>
 
               <div className="modal-actions">
@@ -647,8 +798,9 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
                 <button
                   type="submit"
                   className="btn btn-student"
-                >
-                  Confirm &amp; Board Student
+                    disabled={savingOperation}
+                  >
+                    {savingOperation ? 'Saving…' : 'Confirm &amp; Board Student'}
                 </button>
               </div>
             </form>
@@ -664,54 +816,72 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
           <div className="modal-container" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div className="modal-title-box">
-                <span className="modal-icon">🛑</span>
-                <h3>Confirm Student Deboard</h3>
+                <span className="modal-icon-badge modal-icon-rose"></span>
+                <div className="modal-title-text-group">
+                  <h3>Confirm Student Deboard</h3>
+                  <p className="modal-subtitle">Mark passenger as dropped off</p>
+                </div>
               </div>
               <button
                 type="button"
                 className="modal-close-btn"
                 onClick={() => setDeboardTarget(null)}
+                aria-label="Close dialog"
               >
                 &times;
               </button>
             </div>
 
-            <div style={{ textAlign: 'center', margin: '14px 0 22px' }}>
-              <p style={{ color: '#cbd5e1', fontSize: '15px', lineHeight: '1.6', margin: '0 0 16px' }}>
+            <div className="modal-body-content">
+              {boardError && (
+                <div className="modal-error-banner" role="alert">
+                  <span>⚠️</span>
+                  <span>{boardError}</span>
+                </div>
+              )}
+              <p className="modal-confirm-desc">
                 Are you sure you want to deboard <strong>{deboardTarget.name}</strong> from <strong>{driverBus.busNo}</strong>?
               </p>
 
-              <div className="modal-info-bar" style={{ flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
-                <div>👤 <strong>Passenger:</strong> {deboardTarget.name}</div>
-                <div>🪪 <strong>SAP ID:</strong> {deboardTarget.sapId}</div>
-                <div>📍 <strong>Trip:</strong> {deboardTarget.from} &rarr; {deboardTarget.to}</div>
-                <div>⏰ <strong>Boarded:</strong> {deboardTarget.boardingTime}</div>
+              <div className="modal-manifest-summary">
+                <div className="manifest-item">
+                  <span className="manifest-label">Passenger</span>
+                  <span className="manifest-value">{deboardTarget.name}</span>
+                </div>
+                <div className="manifest-item">
+                  <span className="manifest-label">SAP ID</span>
+                  <span className="manifest-value font-mono">{deboardTarget.sapId}</span>
+                </div>
+                <div className="manifest-item">
+                  <span className="manifest-label">Trip Route</span>
+                  <span className="manifest-value">{deboardTarget.from} &rarr; {deboardTarget.to}</span>
+                </div>
+                <div className="manifest-item">
+                  <span className="manifest-label">⏰ Boarding Time</span>
+                  <span className="manifest-value">{deboardTarget.boardingTime}</span>
+                </div>
               </div>
 
-              <p style={{ color: '#38bdf8', fontSize: '13px', marginTop: '14px', marginBottom: 0 }}>
-                ℹ️ Deboarding frees up 1 seat immediately on {driverBus.busNo}.
-              </p>
+              <div className="modal-info-callout">
+                <span>Deboarding immediately returns 1 seat to active circulation on {driverBus.busNo}.</span>
+              </div>
             </div>
 
-            <div className="modal-actions" style={{ justifyContent: 'center', gap: '14px' }}>
+            <div className="modal-actions-bar">
               <button
                 type="button"
-                className="btn btn-secondary-custom"
+                className="btn-modal-cancel"
                 onClick={() => setDeboardTarget(null)}
               >
                 Cancel
               </button>
               <button
                 type="button"
-                className="btn btn-student"
-                style={{
-                  background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                  borderColor: '#ef4444',
-                  boxShadow: '0 4px 16px rgba(239, 68, 68, 0.4)'
-                }}
+                className="btn-modal-danger-solid"
                 onClick={confirmDeboardStudent}
+                disabled={savingOperation}
               >
-                Confirm Deboard
+                {savingOperation ? 'Saving…' : 'Confirm Deboard'}
               </button>
             </div>
           </div>
@@ -726,50 +896,65 @@ export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStude
           <div className="modal-container" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div className="modal-title-box">
-                <span className="modal-icon">⚠️</span>
-                <h3>Deboard All Passengers</h3>
+                <span className="modal-icon-badge modal-icon-warning">⚠️</span>
+                <div className="modal-title-text-group">
+                  <h3>Deboard All Passengers</h3>
+                  <p className="modal-subtitle">Clear manifest and reset bus capacity</p>
+                </div>
               </div>
               <button
                 type="button"
                 className="modal-close-btn"
                 onClick={() => setShowDeboardAllModal(false)}
+                aria-label="Close dialog"
               >
                 &times;
               </button>
             </div>
 
-            <div style={{ textAlign: 'center', margin: '14px 0 22px' }}>
-              <p style={{ color: '#cbd5e1', fontSize: '15px', lineHeight: '1.6', margin: '0 0 16px' }}>
+            <div className="modal-body-content">
+              {boardError && (
+                <div className="modal-error-banner" role="alert">
+                  <span>⚠️</span>
+                  <span>{boardError}</span>
+                </div>
+              )}
+              <p className="modal-confirm-desc">
                 Are you sure you want to deboard all <strong>{boardedList.length} passengers</strong> from <strong>{driverBus.busNo}</strong>?
               </p>
 
-              <div className="modal-info-bar" style={{ flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
-                <div>🚌 <strong>Bus:</strong> {driverBus.busNo} ({driverBus.route})</div>
-                <div>👥 <strong>Passengers to Deboard:</strong> {boardedList.length}</div>
-                <div>💺 <strong>Seat Capacity Reset:</strong> {driverBus.totalCapacity} seats free</div>
+              <div className="modal-manifest-summary">
+                <div className="manifest-item">
+                  <span className="manifest-label">🚌 Shuttle</span>
+                  <span className="manifest-value">{driverBus.busNo} ({driverBus.route})</span>
+                </div>
+                <div className="manifest-item">
+                  <span className="manifest-label">👥 Passengers to Deboard</span>
+                  <span className="manifest-value font-bold text-danger">{boardedList.length} students</span>
+                </div>
+                <div className="manifest-item">
+                  <span className="manifest-label">💺 Available Seats After</span>
+                  <span className="manifest-value font-bold text-success">{driverBus.totalCapacity} seats free</span>
+                </div>
               </div>
 
-              <p style={{ color: '#fca5a5', fontSize: '13px', marginTop: '14px', marginBottom: 0 }}>
-                ⚠️ All passenger records will be cleared and available seats will reset to full capacity.
-              </p>
+              <div className="modal-warning-callout">
+                <span className="warning-callout-icon">⚠️</span>
+                <span>All passenger records will be cleared and available seats will reset to full capacity ({driverBus.totalCapacity} seats).</span>
+              </div>
             </div>
 
-            <div className="modal-actions" style={{ justifyContent: 'center', gap: '14px' }}>
+            <div className="modal-actions-bar">
               <button
                 type="button"
-                className="btn btn-secondary-custom"
+                className="btn-modal-cancel"
                 onClick={() => setShowDeboardAllModal(false)}
               >
                 Cancel
               </button>
               <button
                 type="button"
-                className="btn btn-student"
-                style={{
-                  background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
-                  borderColor: '#ef4444',
-                  boxShadow: '0 4px 16px rgba(239, 68, 68, 0.4)'
-                }}
+                className="btn-modal-danger-solid"
                 onClick={confirmDeboardAll}
               >
                 Deboard All ({boardedList.length})

@@ -71,8 +71,7 @@ export default function Header({ user, onLogout, currentBoardedBus, onDeboardCli
             </div>
           ) : (
             <div className="header-guest-badge">
-              <span className="guest-dot"></span>
-              <span>Authentication Required</span>
+
             </div>
           )}
         </div>

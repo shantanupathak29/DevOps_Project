@@ -4,7 +4,6 @@ export default function Footer() {
   const developers = [
     {
       name: 'Aarav',
-      role: 'Full Stack Dev',
       initials: 'AA',
       bio: 'Passionate full-stack developer focusing on scalable web applications, real-time UI components, and modern frontend architecture.',
       linkedin: 'https://www.linkedin.com/in/aaravsaxena26/',
@@ -13,7 +12,6 @@ export default function Footer() {
     },
     {
       name: 'Sahaj',
-      role: 'DevOps & Backend',
       initials: 'SA',
       bio: 'Specializing in cloud infrastructure, CI/CD automation pipelines, containerization, and high-availability server operations.',
       linkedin: 'https://www.linkedin.com/in/sahaj-parikh-abz/',
@@ -22,7 +20,6 @@ export default function Footer() {
     },
     {
       name: 'Shantanu',
-      role: 'Frontend & UI/UX',
       initials: 'SH',
       bio: 'Crafting modern responsive user interfaces, interactive campus transit mapping systems, and seamless design experiences.',
       linkedin: 'https://www.linkedin.com/in/shantanupathak29/',
@@ -33,7 +30,6 @@ export default function Footer() {
 
   return (
     <footer className="app-footer" role="contentinfo" aria-label="Site footer">
-      <div className="footer-glow-bar" />
       <div className="footer-container">
 
         {/* Left: Brand Logo & Copyright */}
