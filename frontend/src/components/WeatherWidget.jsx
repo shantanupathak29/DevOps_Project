@@ -354,6 +354,7 @@ export default function WeatherWidget() {
           </div>
 
 
+
           {/* Transit Route Advisory Banner */}
           <div className={`weather-advisory-strip impact-${weather?.impactLevel}`}>
             <span className="advisory-icon">
