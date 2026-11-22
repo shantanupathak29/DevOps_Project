@@ -11,7 +11,6 @@ export default function Login({
   onResetPassword,
   onSignOut,
   onNavigate,
-  onGitHubLogin,
   initialMode = 'login',
   canResetPassword = false,
   systemError = '',
@@ -107,6 +106,7 @@ export default function Login({
           username: username.trim().toLowerCase(),
           email: email.trim(),
           password,
+          role,
         });
         setPassword('');
         setConfirmPassword('');
@@ -163,14 +163,20 @@ export default function Login({
 
   const isReset = mode === 'reset';
   const title = {
-    login: 'Welcome to CampusRide',
-    signup: 'Create your account',
+    login: role === 'student' ? 'Student Sign In' : 'Driver Sign In',
+    signup: role === 'student' ? 'Create Student Account' : 'Create Driver Account',
     forgot: 'Reset your password',
     reset: 'Choose a new password',
   }[mode];
   const description = {
-    login: 'Sign in to access campus shuttle schedules or driver operations.',
-    signup: 'Register with a unique username and email address.',
+    login:
+      role === 'student'
+        ? 'Sign in to access campus shuttle schedules and seat reservations.'
+        : 'Sign in to access Driver Operations and bus controls.',
+    signup:
+      role === 'student'
+        ? 'Register a new student account to track shuttles and book seats.'
+        : 'Register as a bus operator to manage routes and passenger manifests.',
     forgot: 'Enter your account email address or username to receive a reset link.',
     reset: canResetPassword
       ? 'Choose a strong password for your CampusRide account.'
@@ -230,7 +236,7 @@ export default function Login({
               <p className="login-form-desc">{description}</p>
             </div>
 
-            {mode === 'login' && (
+            {(mode === 'login' || mode === 'signup') && (
               <>
                 <div className="role-switch-container">
                   <button
@@ -239,7 +245,9 @@ export default function Login({
                     onClick={() => setRole('student')}
                   >
                     <span className="tab-icon">🎓</span>
-                    <span className="tab-text">Student Portal</span>
+                    <span className="tab-text">
+                      {mode === 'signup' ? 'Student Registration' : 'Student Portal'}
+                    </span>
                   </button>
                   <button
                     type="button"
@@ -247,10 +255,20 @@ export default function Login({
                     onClick={() => setRole('driver')}
                   >
                     <span className="tab-icon">🚍</span>
-                    <span className="tab-text">Driver Operations</span>
+                    <span className="tab-text">
+                      {mode === 'signup' ? 'Driver Registration' : 'Driver Operations'}
+                    </span>
                   </button>
                 </div>
-                <p className="auth-role-note">Portal access is assigned to your account by an administrator.</p>
+                <p className="auth-role-note">
+                  {mode === 'signup'
+                    ? (role === 'student'
+                        ? 'Student account: registers you for the Student Portal & bus booking.'
+                        : 'Driver account: registers you for Driver Operations & fleet cockpit.')
+                    : (role === 'student'
+                        ? 'Opens the Student Portal for live schedules and reservations.'
+                        : 'Opens Driver Operations for bus tracking and passenger check-in.')}
+                </p>
               </>
             )}
 
@@ -364,7 +382,7 @@ export default function Login({
                     ? 'Please wait…'
                     : {
                         login: role === 'student' ? 'Enter Student Portal' : 'Access Driver Cockpit',
-                        signup: 'Create account',
+                        signup: role === 'student' ? 'Create Student Account' : 'Create Driver Account',
                         forgot: 'Send reset link',
                         reset: 'Update password',
                       }[mode]}
@@ -373,39 +391,12 @@ export default function Login({
               </button>
             </form>
 
-            {mode === 'login' && onGitHubLogin && (
-              <div className="auth-oauth-container">
-                <div className="auth-oauth-divider">
-                  <span>or continue with</span>
-                </div>
-                <button
-                  type="button"
-                  className="btn btn-github-login"
-                  onClick={async () => {
-                    setError('');
-                    setMessage('');
-                    setLoading(true);
-                    try {
-                      await onGitHubLogin();
-                    } catch (err) {
-                      setError(err.message || 'Failed to sign in with GitHub.');
-                      setLoading(false);
-                    }
-                  }}
-                  disabled={loading}
-                >
-                  <svg className="github-login-icon" viewBox="0 0 19 19" width="18" height="18" fill="currentColor">
-                    <path fillRule="evenodd" d="M9.356 1.85C5.05 1.85 1.57 5.356 1.57 9.694a7.84 7.84 0 0 0 5.324 7.44c.387.079.528-.168.528-.376 0-.182-.013-.805-.013-1.454-2.165.467-2.616-.935-2.616-.935-.349-.91-.864-1.143-.864-1.143-.71-.48.051-.48.051-.48.787.051 1.2.805 1.2.805.695 1.194 1.817.857 2.268.649.064-.507.27-.857.49-1.052-1.728-.182-3.545-.857-3.545-3.87 0-.857.31-1.558.8-2.104-.078-.195-.349-1 .077-2.078 0 0 .657-.208 2.14.805a7.5 7.5 0 0 1 1.946-.26c.657 0 1.328.092 1.946.26 1.483-1.013 2.14-.805 2.14-.805.426 1.078.155 1.883.078 2.078.502.546.799 1.247.799 2.104 0 3.013-1.818 3.675-3.558 3.87.284.247.528.714.528 1.454 0 1.052-.012 1.896-.012 2.156 0 .208.142.455.528.377a7.84 7.84 0 0 0 5.324-7.441c.013-4.338-3.48-7.844-7.773-7.844" clipRule="evenodd"/>
-                  </svg>
-                  <span>Sign in with GitHub</span>
-                </button>
-              </div>
-            )}
-
             {mode === 'login' && (
               <div className="auth-secondary-actions">
                 <button type="button" onClick={() => switchMode('forgot')}>Forgot Password?</button>
-                <button type="button" onClick={() => switchMode('signup')}>Create an account</button>
+                <button type="button" onClick={() => switchMode('signup')}>
+                  {role === 'student' ? 'Need an account? Create Student Account' : 'Need an account? Create Driver Account'}
+                </button>
               </div>
             )}
             {mode === 'login' && showResendVerification && (
@@ -428,7 +419,9 @@ export default function Login({
             )}
             {mode === 'signup' && (
               <div className="auth-secondary-actions">
-                <button type="button" onClick={() => switchMode('login')}>Already registered? Sign in</button>
+                <button type="button" onClick={() => switchMode('login')}>
+                  {role === 'student' ? 'Already registered? Student Sign In' : 'Already registered? Driver Sign In'}
+                </button>
               </div>
             )}
             {(mode === 'forgot' || isReset) && (

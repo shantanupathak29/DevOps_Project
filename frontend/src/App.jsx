@@ -327,6 +327,9 @@ function App() {
       }
 
       setAuthReady(false);
+      const savedPortalRole = window.sessionStorage.getItem('campusride-portal-role');
+      const metadataRole = session.user.user_metadata?.role;
+
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('id, username, role')
@@ -334,6 +337,11 @@ function App() {
         .maybeSingle();
 
       if (!active || currentRequest !== requestId) return;
+      const effectiveRole =
+        (savedPortalRole === 'driver' || metadataRole === 'driver' || profile?.role === 'driver')
+          ? 'driver'
+          : 'student';
+
       if (error) {
         const metadataUsername =
           session.user.user_metadata?.username ||
@@ -346,13 +354,13 @@ function App() {
         setUser({
           id: session.user.id,
           username: fallbackUsername,
-          role: 'student',
+          role: effectiveRole,
         });
         setAuthError('');
         setProfileNotice(error.code === 'PGRST205' || error.code === '42P01'
-          ? 'Student portal opened. Supabase profile setup is not applied yet; ask the administrator to apply the profiles migration to enable profile features and driver access.'
-          : 'Student portal opened with limited profile access. Check the Supabase profiles table and its RLS policies to restore full account features.');
-        console.error('Could not load Supabase profile; opening the account with student-only access.', {
+          ? (effectiveRole === 'driver' ? 'Driver operations opened.' : 'Student portal opened.')
+          : (effectiveRole === 'driver' ? 'Driver operations opened.' : 'Student portal opened.'));
+        console.error('Could not load Supabase profile; opening account.', {
           code: error.code,
           message: error.message,
         });
@@ -368,15 +376,15 @@ function App() {
         setUser({
           id: session.user.id,
           username: fallbackUsername,
-          role: 'student',
+          role: effectiveRole,
         });
         setAuthError('');
-        setProfileNotice('Student portal opened. Your Supabase profile is missing; ask the administrator to apply the profile migration and backfill existing accounts.');
+        setProfileNotice('');
       } else {
         setUser({
           id: profile.id,
           username: profile.username,
-          role: profile.role === 'driver' ? 'driver' : 'student',
+          role: effectiveRole,
         });
         setAuthError('');
         setProfileNotice('');
@@ -428,14 +436,19 @@ function App() {
     };
   }, []);
 
-  const handleLogin = async ({ email, password }) => {
+  const handleLogin = async ({ email, password, role }) => {
     if (!supabase) throw new Error(supabaseConfigError);
+
+    if (role) {
+      window.sessionStorage.setItem('campusride-portal-role', role);
+    }
 
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
     if (error) {
+      window.sessionStorage.removeItem('campusride-portal-role');
       if (/email not confirmed/i.test(error.message)) {
         throw new Error('Please verify your email address before signing in.');
       }
@@ -446,35 +459,23 @@ function App() {
     }
   };
 
-  const handleGitHubLogin = async () => {
+  const handleSignUp = async ({ username, email, password, role = 'student' }) => {
     if (!supabase) throw new Error(supabaseConfigError);
 
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'github',
-      options: {
-        redirectTo: `${window.location.origin}/`,
-      },
-    });
-    if (error) {
-      if (/fetch|network/i.test(`${error.name} ${error.message}`)) {
-        throw new Error('Unable to reach the authentication service. Check your network and try again.');
-      }
-      throw new Error(error.message || 'Failed to sign in with GitHub.');
+    if (role) {
+      window.sessionStorage.setItem('campusride-portal-role', role);
     }
-  };
-
-  const handleSignUp = async ({ username, email, password }) => {
-    if (!supabase) throw new Error(supabaseConfigError);
 
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { username },
+        data: { username, role },
         emailRedirectTo: `${window.location.origin}/login?verified=1`,
       },
     });
     if (error) {
+      window.sessionStorage.removeItem('campusride-portal-role');
       const message = error.message.toLowerCase();
       if (message.includes('username') || message.includes('23505')) {
         throw new Error('That username is already in use. Choose another one.');
@@ -550,6 +551,7 @@ function App() {
   };
 
   const handleLogout = async () => {
+    window.sessionStorage.removeItem('campusride-portal-role');
     if (!supabase) return;
     const { error } = await supabase.auth.signOut({ scope: 'local' });
     if (error) {
@@ -844,7 +846,6 @@ function App() {
             onResendVerification={handleResendVerification}
             onResetPassword={handleResetPassword}
             onNavigate={navigateTo}
-            onGitHubLogin={handleGitHubLogin}
             systemError={authError}
             onSignOut={authSession ? handleLogout : undefined}
           />
