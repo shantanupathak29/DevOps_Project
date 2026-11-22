@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './App.css';
 import Header from './components/Header';
 import Login from './components/Login';
@@ -747,17 +747,23 @@ function App() {
     setPathname('/');
   };
 
-  // Find if user has boarded ride
-  const currentBoardedBus = user && user.role === 'student' ? buses.find((b) =>
-    (b.boardedStudents || []).some((s) =>
-      s.userId === user.id ||
-      (!s.userId && (
-        normalizeStudentIdentifier(s.name) === normalizeStudentIdentifier(user.username) ||
-        normalizeStudentIdentifier(s.sapId) === normalizeStudentIdentifier(user.username) ||
-        normalizeStudentIdentifier(s.sapId) === '500109999'
-      ))
-    )
-  ) : null;
+  // Find if user has boarded ride (memoized to avoid recalculation on every render)
+  const currentBoardedBus = useMemo(() => {
+    if (!user || user.role !== 'student') return null;
+    const normalizedUser = normalizeStudentIdentifier(user.username);
+    return (
+      buses.find((b) =>
+        (b.boardedStudents || []).some(
+          (s) =>
+            s.userId === user.id ||
+            (!s.userId &&
+              (normalizeStudentIdentifier(s.name) === normalizedUser ||
+                normalizeStudentIdentifier(s.sapId) === normalizedUser ||
+                normalizeStudentIdentifier(s.sapId) === '500109999'))
+        )
+      ) || null
+    );
+  }, [buses, user]);
 
   if (authReady && user && !busDatabaseReady && !busNotice) {
     return (
