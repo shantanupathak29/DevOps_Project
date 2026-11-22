@@ -298,11 +298,11 @@ export default function Login({
               </>
             )}
 
-            {systemError && <p className="auth-feedback auth-feedback-error" role="alert">{systemError}</p>}
-            {error && <p className="auth-feedback auth-feedback-error" role="alert">{error}</p>}
-            {message && <p className="auth-feedback auth-feedback-success" role="status">{message}</p>}
+            {systemError && <p className="auth-feedback auth-feedback-error" role="alert" aria-live="assertive">{systemError}</p>}
+            {error && <p id="auth-error-message" className="auth-feedback auth-feedback-error" role="alert" aria-live="assertive">{error}</p>}
+            {message && <p className="auth-feedback auth-feedback-success" role="status" aria-live="polite">{message}</p>}
 
-            <form className="login-form" onSubmit={handleSubmit} noValidate>
+            <form className="login-form" onSubmit={handleSubmit} noValidate aria-describedby={error ? 'auth-error-message' : undefined}>
               {mode === 'signup' && (
                 <>
                   <div className="form-group">
@@ -318,6 +318,7 @@ export default function Login({
                         value={username}
                         onChange={(event) => setUsername(event.target.value)}
                         placeholder="3–32 letters, numbers, or underscores"
+                        aria-invalid={Boolean(error)}
                         required
                       />
                     </div>
@@ -333,6 +334,7 @@ export default function Login({
                         value={email}
                         onChange={(event) => setEmail(event.target.value)}
                         placeholder="you@example.com"
+                        aria-invalid={Boolean(error)}
                         required
                       />
                     </div>
@@ -354,6 +356,7 @@ export default function Login({
                       value={identifier}
                       onChange={(event) => setIdentifier(event.target.value)}
                       placeholder={mode === 'login' ? 'you@example.com' : 'Enter email or username'}
+                      aria-invalid={Boolean(error)}
                       required
                     />
                   </div>
@@ -373,6 +376,7 @@ export default function Login({
                       value={password}
                       onChange={(event) => setPassword(event.target.value)}
                       placeholder={isReset ? 'At least 8 characters' : 'Enter account password'}
+                      aria-invalid={Boolean(error)}
                       required
                     />
                   </div>
@@ -392,6 +396,7 @@ export default function Login({
                       value={confirmPassword}
                       onChange={(event) => setConfirmPassword(event.target.value)}
                       placeholder="Re-enter password"
+                      aria-invalid={Boolean(error)}
                       required
                     />
                   </div>
