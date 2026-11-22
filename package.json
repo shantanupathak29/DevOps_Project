@@ -1,0 +1,10 @@
+{
+  "name": "campusride-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "npm --prefix frontend run build",
+    "lint": "npm --prefix frontend run lint",
+    "dev": "npm --prefix frontend run dev"
+  }
+}

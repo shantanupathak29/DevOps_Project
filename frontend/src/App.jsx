@@ -335,7 +335,11 @@ function App() {
 
       if (!active || currentRequest !== requestId) return;
       if (error) {
-        const metadataUsername = session.user.user_metadata?.username;
+        const metadataUsername =
+          session.user.user_metadata?.username ||
+          session.user.user_metadata?.user_name ||
+          session.user.user_metadata?.preferred_username ||
+          session.user.user_metadata?.name;
         const fallbackUsername = typeof metadataUsername === 'string' && metadataUsername.trim()
           ? metadataUsername.trim()
           : session.user.email?.split('@')[0] || 'Student';
@@ -353,7 +357,11 @@ function App() {
           message: error.message,
         });
       } else if (!profile) {
-        const metadataUsername = session.user.user_metadata?.username;
+        const metadataUsername =
+          session.user.user_metadata?.username ||
+          session.user.user_metadata?.user_name ||
+          session.user.user_metadata?.preferred_username ||
+          session.user.user_metadata?.name;
         const fallbackUsername = typeof metadataUsername === 'string' && metadataUsername.trim()
           ? metadataUsername.trim()
           : session.user.email?.split('@')[0] || 'Student';
@@ -435,6 +443,23 @@ function App() {
         throw new Error('Unable to reach the authentication service. Check your network and try again.');
       }
       throw new Error('Invalid email address or password.');
+    }
+  };
+
+  const handleGitHubLogin = async () => {
+    if (!supabase) throw new Error(supabaseConfigError);
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'github',
+      options: {
+        redirectTo: `${window.location.origin}/`,
+      },
+    });
+    if (error) {
+      if (/fetch|network/i.test(`${error.name} ${error.message}`)) {
+        throw new Error('Unable to reach the authentication service. Check your network and try again.');
+      }
+      throw new Error(error.message || 'Failed to sign in with GitHub.');
     }
   };
 
@@ -819,6 +844,7 @@ function App() {
             onResendVerification={handleResendVerification}
             onResetPassword={handleResetPassword}
             onNavigate={navigateTo}
+            onGitHubLogin={handleGitHubLogin}
             systemError={authError}
             onSignOut={authSession ? handleLogout : undefined}
           />
