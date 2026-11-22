@@ -7,18 +7,14 @@ import DriverDashboard from './components/DriverDashboard';
 import NotFound from './components/NotFound';
 import Footer from './components/Footer';
 import { supabase, supabaseConfigError } from './lib/supabase';
-
-const normalizeStudentIdentifier = (value = '') => String(value).trim().toLowerCase();
+import { formatShortTime, normalizeStudentIdentifier } from './lib/formatters';
 
 const mapPassengerRow = (row) => ({
   id: row.id,
   userId: row.user_id,
   name: row.name,
   sapId: row.sap_id,
-  boardingTime: new Date(row.boarded_at).toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit',
-  }),
+  boardingTime: formatShortTime(row.boarded_at),
   from: row.from_stop,
   to: row.to_stop,
   status: row.status,
