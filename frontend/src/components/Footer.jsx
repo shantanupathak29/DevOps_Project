@@ -38,6 +38,10 @@ export default function Footer() {
             <img
               src="/campusride-logo.png"
               alt="CampusRide Logo"
+              width="28"
+              height="28"
+              loading="lazy"
+              decoding="async"
               className="footer-logo-img"
             />
           </div>

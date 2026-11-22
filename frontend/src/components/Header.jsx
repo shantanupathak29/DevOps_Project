@@ -10,6 +10,10 @@ export default function Header({ user, onLogout, currentBoardedBus, onDeboardCli
             <img
               src="/campusride-logo.png"
               alt="CampusRide Logo"
+              width="42"
+              height="42"
+              loading="eager"
+              decoding="async"
               className="header-logo-img"
             />
           </div>
