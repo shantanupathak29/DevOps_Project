@@ -10,7 +10,7 @@
   --bg-surface: #fdfbf7;
   --bg-surface-elevated: #ede5d8;
   --bg-surface-card: #fdfbf7;
-  --bg-surface-glass: rgba(253, 251, 247, 0.92);
+  --bg-surface-glass: rgba(253, 251, 247, 0.75);
   --bg-subtle-tint: #f8f4ed;
 
   /* Primary Brand Accent: Deep Forest Pine */
@@ -112,10 +112,10 @@ body {
   z-index: 100;
   width: 100%;
   background: var(--bg-surface-glass);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border-medium);
-  box-shadow: 0 2px 10px rgba(60, 50, 40, 0.05);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border-bottom: 1px solid rgba(216, 205, 191, 0.65);
+  box-shadow: 0 4px 20px rgba(60, 50, 40, 0.05);
 }
 
 .header-glass-container {
@@ -3316,9 +3316,11 @@ select option {
 .app-footer {
   position: relative;
   z-index: 50;
-  background: var(--bg-surface);
-  border-top: 1px solid var(--border-medium);
-  box-shadow: 0 -2px 10px rgba(60, 50, 40, 0.04);
+  background: var(--bg-surface-glass);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border-top: 1px solid rgba(216, 205, 191, 0.65);
+  box-shadow: 0 -4px 20px rgba(60, 50, 40, 0.04);
   margin-top: auto;
   width: 100%;
 }
