@@ -34,6 +34,16 @@ const getWeatherInterpretation = (code, isDay = 1, precipitation = 0, windSpeed 
       impactLevel: 'caution',
     };
   }
+  // High wind advisory
+  if (windSpeed > 40) {
+    return {
+      label: 'High Winds',
+      icon: '💨',
+      badgeClass: 'weather-status-caution',
+      advisory: 'Strong foothill winds detected. Shuttles moving with reduced speed.',
+      impactLevel: 'caution',
+    };
+  }
   // Snow
   if ([71, 73, 75, 77, 85, 86].includes(code)) {
     return {
@@ -116,8 +126,9 @@ export default function WeatherWidget() {
 
   // Fetch live weather data from Open-Meteo API
   const fetchWeather = useCallback(async (lat, lon, locationLabel, isManualRefresh = false) => {
-    if (isManualRefresh) setRefreshing(true);
-    else setLoading(true);
+    if (isManualRefresh) {
+      setRefreshing(true);
+    }
 
     try {
       const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m&timezone=auto`;
@@ -186,16 +197,26 @@ export default function WeatherWidget() {
 
   // Update weather whenever selected campus changes
   useEffect(() => {
-    if (selectedCampus === 'gps') return;
+    if (selectedCampus === 'gps') return undefined;
+    let cancelled = false;
     const campus = CAMPUS_LOCATIONS[selectedCampus] || CAMPUS_LOCATIONS.bidholi;
-    fetchWeather(campus.lat, campus.lon, campus.name);
+
+    const loadWeather = async (isManual = false) => {
+      if (cancelled) return;
+      await fetchWeather(campus.lat, campus.lon, campus.name, isManual);
+    };
+
+    void loadWeather(false);
 
     // Auto-refresh every 4 minutes for live accuracy
     const timer = setInterval(() => {
-      fetchWeather(campus.lat, campus.lon, campus.name, false);
+      void loadWeather(false);
     }, 240000);
 
-    return () => clearInterval(timer);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
   }, [selectedCampus, fetchWeather]);
 
   // Handle manual refresh button click
