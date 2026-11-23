@@ -188,14 +188,19 @@ export default function WeatherWidget() {
   useEffect(() => {
     if (selectedCampus === 'gps') return;
     const campus = CAMPUS_LOCATIONS[selectedCampus] || CAMPUS_LOCATIONS.bidholi;
-    fetchWeather(campus.lat, campus.lon, campus.name);
+    const kickoff = setTimeout(() => {
+      fetchWeather(campus.lat, campus.lon, campus.name);
+    }, 0);
 
     // Auto-refresh every 4 minutes for live accuracy
     const timer = setInterval(() => {
       fetchWeather(campus.lat, campus.lon, campus.name, false);
     }, 240000);
 
-    return () => clearInterval(timer);
+    return () => {
+      clearTimeout(kickoff);
+      clearInterval(timer);
+    };
   }, [selectedCampus, fetchWeather]);
 
   // Handle manual refresh button click
