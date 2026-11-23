@@ -303,11 +303,6 @@ function App() {
     );
   };
 
-  const navigateTo404 = () => {
-    setCurrentView('404');
-    window.history.pushState(null, '', '/404');
-  };
-
   const navigateToHome = () => {
     setCurrentView('app');
     window.history.pushState(null, '', '/');
