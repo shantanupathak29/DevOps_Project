@@ -32,6 +32,9 @@ jobs:
       - name: Run code linter
         run: npm --prefix frontend run lint
 
+      - name: Run automated tests
+        run: npm --prefix frontend test
+
       - name: Build frontend application
         run: npm --prefix frontend run build
 

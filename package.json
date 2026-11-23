@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "test": "npm --prefix frontend test",
     "build": "npm --prefix frontend run build",
     "lint": "npm --prefix frontend run lint",
     "test": "npm --prefix frontend test",
