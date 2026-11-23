@@ -55,8 +55,7 @@ export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, o
   const availableSeats = buses.reduce((acc, curr) => curr.status !== 'Out of Service' ? acc + curr.seatsAvailable : acc, 0);
 
   // Helper for occupancy color
-  const getCapacityMeta = (seatsAvailable, totalCapacity) => {
-    const occupancyPercent = ((totalCapacity - seatsAvailable) / totalCapacity) * 100;
+  const getCapacityMeta = (seatsAvailable, _totalCapacity) => {
     if (seatsAvailable === 0) {
       return { label: 'Full', color: '#b91c1c', badgeClass: 'capacity-full', barColor: '#b91c1c' };
     }
