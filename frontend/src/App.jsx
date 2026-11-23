@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './App.css';
 import Header from './components/Header';
 import Login from './components/Login';
@@ -198,15 +198,9 @@ const INITIAL_BUSES = [
 function App() {
   const [user, setUser] = useState(null);
   const [buses, setBuses] = useState(INITIAL_BUSES);
-  const [currentView, setCurrentView] = useState('app'); // 'app' | '404'
-
-  // Sync route path for 404
-  useEffect(() => {
-    const path = window.location.pathname;
-    if (path === '/404') {
-      setCurrentView('404');
-    }
-  }, []);
+  const [currentView, setCurrentView] = useState(() =>
+    window.location.pathname === '/404' ? '404' : 'app'
+  );
 
   const handleLogin = (userData) => {
     setUser(userData);
