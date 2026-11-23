@@ -1,181 +1,78 @@
-# Campus Ride
+# CampusRide
 
-Campus Ride is a web-based application designed to make campus transportation easier and more convenient. The platform allows students to view available campus buses and check the number of empty seats, helping them plan their journeys efficiently.
-
-The project also serves as a hands-on learning initiative for understanding and practicing Git and GitHub in a collaborative development environment.
+CampusRide is a React application for campus shuttle schedules, student
+reservations, and driver operations. The frontend is built with Vite and uses
+the existing Supabase project for authentication and persistent bus data.
 
 ## Features
 
-* View available campus buses
-* Check the number of empty seats in each bus
-* Support easier navigation within the campus
-* Help students plan their bus journeys efficiently
-* Responsive and user-friendly interface
+- Email/password sign-up and sign-in
+- Persistent Supabase sessions, email verification, and password recovery
+- Role-based student and driver portals
+- Live shuttle schedules, seat reservations, and driver check-in/operations
+- Clear configuration messaging when Supabase frontend settings are missing
 
-## Tech Stack
+## Project layout
 
-### Frontend
+- `frontend/` — React + Vite application and browser Supabase client
+- `backend/supabase/` — Supabase migrations and Edge Functions
+- `login.html` — legacy static page; the active Vite application is in `frontend/`
 
-* React
-* Tailwind CSS
+## Run locally
 
-### Backend
+Use Node.js and npm. From the repository root:
 
-* Python
-
-## Project Structure
-
-```text
-Campus-Ride/
-│
-├── frontend/          # React and Tailwind CSS application
-│
-├── backend/           # Python backend
-│
-├── README.md
-│
-└── .gitignore
+```powershell
+npm --prefix frontend install
+Copy-Item frontend/.env.example frontend/.env.local
 ```
 
-## Project Objective
+Set the actual existing Supabase project's URL and public anon/publishable key
+in `frontend/.env.local`, then start the frontend:
 
-The primary objective of Campus Ride is to build a practical campus transportation solution while providing contributors with hands-on experience in Git and GitHub.
-
-The project allows contributors to practice:
-
-* Git fundamentals
-* Repository management
-* Branching strategies
-* Creating meaningful commits
-* Working with remote repositories
-* Pulling and pushing changes
-* Creating and reviewing pull requests
-* Resolving merge conflicts
-* Collaborative software development
-
-## Getting Started
-
-### Clone the Repository
-
-```bash
-git clone <repository-url>
+```powershell
+npm --prefix frontend run dev
 ```
 
-### Navigate to the Project Directory
+Build and lint the frontend:
 
-```bash
-cd Campus-Ride
+```powershell
+npm --prefix frontend run build
+npm --prefix frontend run lint
 ```
 
-### Frontend Setup
+Never put a Supabase service-role key in the frontend or in any `VITE_*`
+variable. `frontend/.env.local` is ignored by Git.
 
-Navigate to the frontend directory:
+## Authentication and driver access
 
-```bash
-cd frontend
-```
+The browser client is initialized in `frontend/src/lib/supabase.js` from
+`VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. Login, registration,
+verification, recovery, session restoration, and logout are handled by the
+frontend using the existing Supabase project.
 
-Install the required dependencies:
+The selected portal tab does not grant a role. After authentication, the
+application reads `public.profiles.role`: `student` opens the student portal and
+`driver` opens Driver Operations. New profiles default to `student`. An
+administrator must grant driver access in Supabase; see
+[`backend/README.md`](backend/README.md) for the safe assignment procedure.
 
-```bash
-npm install
-```
+## Deploy to Vercel
 
-Start the development server:
+Configure `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in the Vercel
+project's **Settings → Environment Variables** for every applicable target
+(Production, Preview, and Development). Vite embeds these variables at build
+time, so changing them requires a new deployment.
 
-```bash
-npm run dev
-```
+Set the Vercel project root directory to `frontend`, build command to
+`npm run build`, and output directory to `dist`. Ensure the host serves
+`index.html` for application routes such as `/login` and `/reset-password`.
+Supabase redirect URLs, email setup, migrations, and recovery Edge Function
+deployment are documented in [`backend/README.md`](backend/README.md).
 
-### Backend Setup
+## Supabase setup
 
-Navigate to the backend directory:
-
-```bash
-cd backend
-```
-
-Install the required dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-Run the backend server:
-
-```bash
-python main.py
-```
-
-## Git Workflow
-
-Contributors should follow the workflow below when making changes to the project.
-
-### Create a Branch
-
-```bash
-git checkout -b feature/your-feature-name
-```
-
-### Check Changes
-
-```bash
-git status
-```
-
-### Add and Commit Changes
-
-```bash
-git add .
-git commit -m "Add feature description"
-```
-
-### Push the Branch
-
-```bash
-git push origin feature/your-feature-name
-```
-
-After pushing the changes, create a pull request to merge the branch into the main branch.
-
-## Contributing
-
-Contributions are welcome. This project is intended to provide contributors with practical experience in collaborative development using Git and GitHub.
-
-1. Fork the repository.
-2. Clone your fork locally.
-3. Create a new branch.
-4. Make the required changes.
-5. Commit your changes with a meaningful message.
-6. Push the branch to your repository.
-7. Create a pull request.
-
-## Future Improvements
-
-* Real-time bus seat availability
-* Live bus tracking
-* Campus route visualization
-* Bus schedules and timings
-* User authentication
-* Notifications related to bus availability
-* Administrative dashboard for managing buses
-
-## Learning Goals
-
-The primary learning goals of this project are:
-
-* Understanding version control using Git
-* Learning GitHub workflows
-* Working collaboratively on a shared codebase
-* Understanding branches, commits, merges, and pull requests
-* Resolving merge conflicts
-* Understanding collaborative software development practices
-* Building a full-stack application using React, Tailwind CSS, and Python
-
-## License
-
-This project is currently intended for educational and learning purposes.
-
-## Contributors
-
-Contributions and collaboration are welcome. Contributors can participate by creating issues, working on features, improving documentation, and submitting pull requests.
+Review the migration and deployment instructions in
+[`backend/README.md`](backend/README.md) before applying changes to a Supabase
+project. Do not replace an existing schema or apply migrations blindly. The
+frontend does not deploy Supabase migrations or Edge Functions automatically.
