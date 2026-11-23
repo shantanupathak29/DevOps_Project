@@ -4,6 +4,7 @@ import {
   getWeatherInterpretation,
   formatTemperature,
   getElevationForCampus,
+  createFallbackTelemetry,
 } from '../lib/weather';
 
 export default function WeatherWidget() {
@@ -15,6 +16,7 @@ export default function WeatherWidget() {
   const [lastSyncTime, setLastSyncTime] = useState(null);
   const [customLocationName, setCustomLocationName] = useState(null);
   const [geoLocating, setGeoLocating] = useState(false);
+  const [fetchError, setFetchError] = useState(null);
 
   // Fetch live weather data from Open-Meteo API
   const fetchWeather = useCallback(async (lat, lon, locationLabel, isManualRefresh = false) => {
@@ -23,8 +25,9 @@ export default function WeatherWidget() {
     }
 
     try {
+      setFetchError(null);
       const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m&timezone=auto`;
-      const response = await fetch(url);
+      const response = await fetch(url, { signal: AbortSignal.timeout(8000) });
       
       if (!response.ok) {
         throw new Error(`Weather API error (${response.status})`);
@@ -54,6 +57,7 @@ export default function WeatherWidget() {
         advisory: weatherInterpretation.advisory,
         impactLevel: weatherInterpretation.impactLevel,
         locationLabel: locationLabel || 'Dehradun Campus',
+        isFallback: false,
       });
 
       const now = new Date();
@@ -62,24 +66,14 @@ export default function WeatherWidget() {
       );
     } catch (err) {
       console.warn('Weather API fetch failed, activating resilient telemetry fallback:', err);
-      // Fallback realistic telemetry data so the UI remains pristine
-      const fallbackInterp = getWeatherInterpretation(2, 1, 0, 4);
-      setWeather({
-        temperatureC: 19,
-        feelsLikeC: 20,
-        humidity: 78,
-        windSpeed: 4.2,
-        precipitation: 0.0,
-        weatherCode: 2,
-        isDay: 1,
-        label: fallbackInterp.label,
-        icon: fallbackInterp.icon,
-        badgeClass: fallbackInterp.badgeClass,
-        advisory: fallbackInterp.advisory,
-        impactLevel: fallbackInterp.impactLevel,
-        locationLabel: locationLabel || 'Bidholi Campus',
-      });
-      setLastSyncTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      try {
+        const fallback = createFallbackTelemetry(locationLabel || 'Bidholi Campus');
+        setWeather(fallback);
+        setLastSyncTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      } catch (fallbackErr) {
+        console.error('Critical weather telemetry failure:', fallbackErr);
+        setFetchError('Unable to retrieve weather telemetry');
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -234,6 +228,13 @@ export default function WeatherWidget() {
           <div className="weather-mini-spinner"></div>
           <span>Retrieving Dehradun campus weather telemetry...</span>
         </div>
+      ) : !weather ? (
+        <div className="weather-error-state">
+          <span>{fetchError || 'Unable to load campus weather telemetry.'}</span>
+          <button type="button" className="weather-retry-btn" onClick={handleRefresh}>
+            Retry Telemetry
+          </button>
+        </div>
       ) : (
         <div className="weather-display-body">
           {/* Main Temperature & Icon Hero */}
@@ -314,7 +315,7 @@ export default function WeatherWidget() {
           <div className="weather-sync-footer">
             <span className="sync-pulse-dot"></span>
             <span className="sync-text">
-              Live Station Feed &bull; Synced {lastSyncTime || 'Just now'}
+              {weather?.isFallback ? 'Station Telemetry (Offline Cache)' : 'Live Station Feed'} &bull; Synced {lastSyncTime || 'Just now'}
             </span>
           </div>
         </div>

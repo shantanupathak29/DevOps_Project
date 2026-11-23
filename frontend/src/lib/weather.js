@@ -144,3 +144,28 @@ export const getElevationForCampus = (campusId) => {
   }
   return '800m';
 };
+
+/**
+ * Creates default fallback telemetry when remote API is unreachable
+ * @param {string} [locationLabel='Bidholi Campus']
+ * @returns {object}
+ */
+export const createFallbackTelemetry = (locationLabel = 'Bidholi Campus') => {
+  const interp = getWeatherInterpretation(2, 1, 0, 4);
+  return {
+    temperatureC: 19,
+    feelsLikeC: 20,
+    humidity: 78,
+    windSpeed: 4.2,
+    precipitation: 0.0,
+    weatherCode: 2,
+    isDay: 1,
+    label: interp.label,
+    icon: interp.icon,
+    badgeClass: interp.badgeClass,
+    advisory: interp.advisory,
+    impactLevel: interp.impactLevel,
+    locationLabel,
+    isFallback: true,
+  };
+};
