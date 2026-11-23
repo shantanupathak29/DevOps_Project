@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 // UPES Campus coordinates in Dehradun, Uttarakhand
 const CAMPUS_LOCATIONS = {
