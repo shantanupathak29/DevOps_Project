@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, onBoardStudent, onDeboardStudent }) {
   const [searchTerm, setSearchTerm] = useState('');
