@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import WeatherWidget from './WeatherWidget';
 import GradientASCII from './GradientASCII';
 

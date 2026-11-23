@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
-export default function StudentDashboard({ user, buses, _onLogout, onBoardStudent, onDeboardStudent }) {
+export default function StudentDashboard({ user, buses, onLogout: _onLogout, onBoardStudent, onDeboardStudent }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [directionFilter, setDirectionFilter] = useState('All'); // 'All' | 'Kandoli → Bidholi' | 'Bidholi → Kandoli'
   const [statusFilter, setStatusFilter] = useState('All');
@@ -58,8 +58,7 @@ export default function StudentDashboard({ user, buses, _onLogout, onBoardStuden
   const availableSeats = buses.reduce((acc, curr) => curr.status !== 'Out of Service' ? acc + curr.seatsAvailable : acc, 0);
 
   // Helper for occupancy color
-  const getCapacityMeta = (seatsAvailable, totalCapacity) => {
-    const _occupancyPercent = ((totalCapacity - seatsAvailable) / totalCapacity) * 100;
+  const getCapacityMeta = (seatsAvailable, _totalCapacity) => {
     if (seatsAvailable === 0) {
       return { label: 'Full', color: '#b91c1c', badgeClass: 'capacity-full', barColor: '#b91c1c' };
     }

@@ -247,7 +247,9 @@ function App() {
   );
   const [buses, setBuses] = useState(INITIAL_BUSES);
   const busWriteQueue = useRef(Promise.resolve());
-  const [currentView, setCurrentView] = useState('app'); // 'app' | '404'
+  const [currentView, setCurrentView] = useState(() =>
+    window.location.pathname === '/404' ? '404' : 'app'
+  ); // 'app' | '404'
   const busDatabaseReady = Boolean(authSession?.user?.id)
     && busDatabaseUserId === authSession.user.id;
 

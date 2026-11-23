@@ -1,5 +1,3 @@
-import React from 'react';
-
 export default function Header({ user, onLogout, currentBoardedBus, onDeboardClick }) {
   return (
     <header className="main-app-header">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 // UPES Campus coordinates in Dehradun, Uttarakhand
 const CAMPUS_LOCATIONS = {
@@ -23,7 +23,7 @@ const CAMPUS_LOCATIONS = {
 };
 
 // Interpret WMO Weather Codes to icons, labels, and transit advisories
-const getWeatherInterpretation = (code, isDay = 1, precipitation = 0, windSpeed = 0) => {
+const getWeatherInterpretation = (code, isDay = 1, precipitation = 0, _windSpeed = 0) => {
   // Thunderstorms
   if ([95, 96, 99].includes(code)) {
     return {
@@ -206,7 +206,9 @@ export default function WeatherWidget() {
       await fetchWeather(campus.lat, campus.lon, campus.name, isManual);
     };
 
-    void loadWeather(false);
+    const kickoff = setTimeout(() => {
+      void loadWeather(false);
+    }, 0);
 
     // Auto-refresh every 4 minutes for live accuracy
     const timer = setInterval(() => {
@@ -215,6 +217,7 @@ export default function WeatherWidget() {
 
     return () => {
       cancelled = true;
+      clearTimeout(kickoff);
       clearInterval(timer);
     };
   }, [selectedCampus, fetchWeather]);

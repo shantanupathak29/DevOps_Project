@@ -1,4 +1,3 @@
-import React from 'react';
 import TRexGame from './TRexGame';
 
 export default function NotFound({ onNavigateHome, user }) {
