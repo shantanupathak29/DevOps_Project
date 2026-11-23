@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 export default function DriverDashboard({ user, buses, onUpdateBus, onBoardStudent, onDeboardStudent, onDeboardAllStudents, onLogout }) {
   const defaultBus = buses.find(b => b.driver.toLowerCase() === user.username.toLowerCase()) || buses[0];
