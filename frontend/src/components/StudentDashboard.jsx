@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function StudentDashboard({ user, buses, onLogout, onUpdateBus, onBoardStudent, onDeboardStudent }) {
+export default function StudentDashboard({ user, buses, onLogout: _onLogout, onUpdateBus, onBoardStudent, onDeboardStudent }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [directionFilter, setDirectionFilter] = useState('All'); // 'All' | 'Kandoli → Bidholi' | 'Bidholi → Kandoli'
   const [statusFilter, setStatusFilter] = useState('All');
