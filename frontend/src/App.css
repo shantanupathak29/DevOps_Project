@@ -3276,6 +3276,186 @@ select option {
 .screen-dot.yellow { background: #f59e0b; }
 .screen-dot.green { background: #10b981; }
 
+.arcade-game-area {
+  padding: 12px;
+  background: var(--bg-surface);
+}
+
+.trex-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.trex-hud {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: var(--bg-surface-elevated);
+  border-radius: 8px;
+  border: 1px solid var(--border-medium);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.trex-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: 1px;
+}
+
+.trex-pulse-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--accent-emerald);
+  border-radius: 50%;
+}
+
+.trex-scores {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: monospace;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 1.5px;
+}
+
+.trex-hi-score {
+  color: var(--text-muted);
+}
+
+.trex-current-score {
+  color: var(--text-heading);
+}
+
+.trex-current-score.milestone-flash {
+  color: var(--secondary);
+}
+
+.trex-controls-top {
+  display: flex;
+  gap: 6px;
+}
+
+.trex-hud-btn {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  color: var(--text-secondary);
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.trex-canvas-wrapper {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  background: linear-gradient(180deg, #090d16 0%, #131b2a 100%);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.trex-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.trex-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.82);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #f8fafc;
+}
+
+.trex-overlay-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+}
+
+.trex-play-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.trex-restart-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.trex-controls-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px;
+  flex-wrap: wrap;
+}
+
+.trex-hint-text {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+.trex-mobile-touch-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.touch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-medium);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-heading);
+  cursor: pointer;
+}
+
 .not-found-actions {
   display: flex;
   gap: 14px;
@@ -3548,11 +3728,14 @@ select option {
 }
 
 /* ==========================================================================
-   Responsive Adaptations
+   Responsive Adaptations Across All Devices (Mobile, Tablet, Desktop)
    ========================================================================== */
+
+/* Large Tablets and Small Laptops (<= 1024px) */
 @media (max-width: 1024px) {
   .login-layout-wrapper {
     grid-template-columns: 1fr;
+    max-width: 600px;
   }
 
   .login-brand-panel {
@@ -3565,11 +3748,18 @@ select option {
     padding: 32px 28px;
   }
 
+  .timetable-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+  }
+
   .timetable-header-row,
   .timetable-row {
-    grid-template-columns: 100px 100px 1.2fr 100px 1fr 140px;
+    grid-template-columns: 110px 110px 1.2fr 110px 1fr 140px;
     font-size: 12px;
     padding: 10px 14px;
+    min-width: 720px;
   }
 
   .pass-body {
@@ -3580,21 +3770,196 @@ select option {
   .pass-actions {
     align-items: flex-start;
   }
+
+  .driver-dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
 }
 
+/* Medium Tablets & Large Phones (<= 900px) */
+@media (max-width: 900px) {
+  .portal-controls-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .direction-tabs-group {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+  }
+
+  .direction-tabs-group::-webkit-scrollbar {
+    display: none;
+  }
+
+  .direction-tab-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-size: 12.5px;
+    padding: 7px 12px;
+  }
+
+  .controls-right-group {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .portal-search-box {
+    flex: 1 1 180px;
+    min-width: 0;
+  }
+
+  .portal-filter-dropdown {
+    flex: 1 1 auto;
+  }
+
+  .portal-filter-dropdown select {
+    width: 100%;
+  }
+
+  .view-mode-toggle {
+    flex-shrink: 0;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+}
+
+/* Tablets & Mobile Devices (<= 768px) */
 @media (max-width: 768px) {
+  /* Navigation Header */
+  .header-glass-container {
+    padding: 10px 16px;
+    gap: 10px;
+  }
+
   .header-center-info {
     display: none;
   }
 
+  .header-subtitle {
+    display: none;
+  }
+
+  .header-brand-title .brand-name {
+    font-size: 18px;
+  }
+
+  .header-logo-badge {
+    width: 36px;
+    height: 36px;
+  }
+
+  .user-profile-widget {
+    gap: 8px;
+  }
+
+  .user-avatar-pill {
+    padding: 3px 10px 3px 4px;
+    gap: 8px;
+  }
+
+  .user-avatar-initial {
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+  }
+
+  .user-name {
+    font-size: 12px;
+  }
+
+  .user-role-sub {
+    display: none;
+  }
+
+  .btn-header-logout {
+    padding: 6px 10px;
+    font-size: 11.5px;
+    gap: 4px;
+  }
+
+  .header-active-ride-btn {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+
+  /* Portal Subnav */
   .portal-subnav {
-    padding: 16px 20px;
+    padding: 14px 16px;
   }
 
+  .portal-subnav-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .portal-main-heading {
+    font-size: 22px;
+  }
+
+  .portal-subnav-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    width: 100%;
+  }
+
+  .quick-stat-chip {
+    min-width: 0;
+    padding: 8px 10px;
+  }
+
+  .stat-chip-label {
+    font-size: 10px;
+  }
+
+  .stat-chip-val {
+    font-size: 13px;
+  }
+
+  /* Portal Container */
   .portal-body-container {
-    padding: 16px 20px 32px;
+    padding: 14px 16px 32px;
   }
 
+  /* Active Boarding Pass */
+  .pass-header-strip {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 12px 14px;
+  }
+
+  .pass-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .pass-bus-number {
+    font-size: 24px;
+  }
+
+  .btn-release-pass {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Mobile Timetable Card Transformation */
   .timetable-header-row {
     display: none;
   }
@@ -3602,26 +3967,371 @@ select option {
   .timetable-row {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 10px;
-    padding: 16px;
+    padding: 14px 16px;
+    min-width: 0;
+    border-bottom: 1.5px solid var(--border-medium);
   }
 
   .td-cell {
     width: 100%;
+    display: flex;
+    align-items: center;
     justify-content: space-between;
   }
 
-  .pass-body {
-    grid-template-columns: 1fr;
+  .td-actions {
+    margin-top: 4px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border-light);
+  }
+
+  .btn-table-book,
+  .btn-table-details {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 14px;
+  }
+
+  /* Corridor Schematic */
+  .corridor-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .corridor-legend {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .corridor-selected-strip {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .selected-strip-left,
+  .selected-strip-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  /* Driver Dashboard */
+  .dashboard-container {
+    padding: 14px 16px 28px;
+  }
+
+  .dashboard-hero-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .banner-title {
+    font-size: 22px;
+  }
+
+  .driver-bus-selector-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+
+  .selector-left {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .selector-left select,
+  .bus-select-dropdown {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .selector-right {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: space-between;
+  }
+
+  .btn-deboard-all-top,
+  .btn-sm-board {
+    flex: 1 1 auto;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 16px;
+  }
+
+  .boarded-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 0 16px 14px;
+  }
+
+  .boarded-search-box {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .boarded-stop-filter {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .boarded-stop-filter select {
+    flex: 1;
+    margin-left: 8px;
+  }
+
+  .boarded-table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .boarded-table {
+    min-width: 580px;
+  }
+
+  /* Footer */
+  .footer-container {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+    padding: 16px 20px;
+  }
+
+  .footer-left {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .footer-divider-dot {
+    display: none;
+  }
+
+  .footer-right {
+    justify-content: center;
+    gap: 8px;
+  }
+
+  /* 404 / NotFound Page */
+  .not-found-container {
+    padding: 24px 16px;
+  }
+
+  .not-found-code {
+    font-size: clamp(56px, 12vw, 84px);
+  }
+
+  .not-found-title {
+    font-size: 22px;
+  }
+
+  .not-found-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .not-found-actions .btn {
+    width: 100%;
+    justify-content: center;
   }
 
   .not-found-tips-grid {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+/* Mobile Screens (<= 640px) */
+@media (max-width: 640px) {
+  /* Login Page */
+  .login-page {
+    padding: 16px 12px;
   }
 
-  .driver-dashboard-grid {
+  .login-layout-wrapper {
+    border-radius: 14px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .login-brand-panel {
+    padding: 22px 18px;
+  }
+
+  .login-card-container {
+    padding: 24px 18px;
+  }
+
+  .brand-hero-title {
+    font-size: clamp(22px, 5vw, 28px);
+  }
+
+  .brand-hero-text {
+    margin: 18px 0;
+  }
+
+  .route-arrow-line {
+    margin: 0 8px;
+  }
+
+  /* Weather Widget */
+  .weather-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .weather-metric-item {
+    padding: 7px 8px;
+  }
+
+  /* Stats Grid */
+  .stats-grid {
     grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  /* Cards Grid Layout */
+  .cards-grid-layout {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  /* Modals */
+  .modal-backdrop {
+    padding: 12px;
+  }
+
+  .modal-container,
+  .modal-card-dialog {
+    max-width: 100%;
+    width: 100%;
+    border-radius: 12px;
+  }
+
+  .modal-form {
+    padding: 16px;
+  }
+
+  .modal-actions,
+  .modal-actions-bar {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .modal-actions button,
+  .modal-actions-bar button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Small Smart Phones (<= 480px) */
+@media (max-width: 480px) {
+  .login-page {
+    padding: 12px 8px;
+  }
+
+  .login-brand-panel {
+    padding: 18px 14px;
+  }
+
+  .login-card-container {
+    padding: 20px 14px;
+  }
+
+  .route-preview-badge {
+    padding: 10px 12px;
+    font-size: 11.5px;
+  }
+
+  .route-stop-point {
+    font-size: 11.5px;
+    gap: 6px;
+  }
+
+  .portal-subnav-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .quick-stat-chip:last-child {
+    grid-column: span 2;
+  }
+
+  .controls-right-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .portal-search-box,
+  .portal-filter-dropdown,
+  .view-mode-toggle {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .view-mode-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .view-toggle-btn {
+    justify-content: center;
+  }
+
+  .campus-select-chip {
+    padding: 5px 8px;
+    font-size: 11px;
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .weather-temp-main {
+    font-size: 22px;
+  }
+
+  .weather-icon-animated {
+    font-size: 26px;
+  }
+
+  .btn-header-logout span {
+    display: none;
+  }
+
+  .btn-header-logout {
+    padding: 6px 8px;
+  }
+
+  .arcade-cabinet {
+    padding: 10px;
+  }
+
+  .trex-canvas-wrapper {
+    height: 170px;
+  }
+
+  .touch-btn {
+    padding: 10px 14px;
   }
 }
 
